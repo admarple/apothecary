@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% set active_page = section_type %}
+{% block body %}
+  <ul class=sections,{{ section_type }}>
+    {% for section in sections %}
+      <li><h2>{{ section.title }}</h2>{{ section.text|safe }}
+    {% else %}
+      <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em>
+    {% endfor %}
+  </ul>
+{% endblock %}

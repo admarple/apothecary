@@ -1,0 +1,36 @@
+<!doctype html>
+<title>{{ title }}</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=container>
+  <div class=header>
+    <div class=page>
+      {% set active_page = active_page|default('index') -%}
+      <ul class="nav">
+        {% for item in nav_bar %}
+          <li{% if item.id == active_page %} class="active"{% endif
+              %}><a href="{{ item.href }}">{{ item.caption }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class=body>
+    <div class=page>
+      {% for message in get_flashed_messages() %}
+        <div class=flash>{{ message }}</div>
+      {% endfor %}
+
+      {% block body %}{% endblock %}
+    </div>
+  </div>
+
+  <div class=footer>
+    <div class=page>
+      <ul class=toes>
+        {% for toe in toes %}
+          <li><a href="{{ toe.href }}">{{ toe.caption }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
