@@ -252,6 +252,8 @@ def setup(fresh=False, prefix=''):
             except botocore.exceptions.ClientError as e:
                 if 'Requested resource not found: Table' in str(e):
                     logging.info('Table for %s does not yet exist', dao_class)
+                else:
+                    raise e
 
         # create the new table
         try:
@@ -261,6 +263,8 @@ def setup(fresh=False, prefix=''):
         except botocore.exceptions.ClientError as e:
             if 'Table already exists' in str(e):
                 logging.info('Table for %s already exists', dao_class)
+            else:
+                raise e
 
 
 if __name__ == '__main__':
