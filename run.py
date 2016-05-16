@@ -1,3 +1,8 @@
 #!/usr/bin/env python
-from apothecary import app
+import getpass
+import logging
+from apothecary import app, model
+
+logging.root.setLevel('INFO')
+model.setup(prefix=getpass.getuser() + '_', fresh=False)
 app.run(debug=True)

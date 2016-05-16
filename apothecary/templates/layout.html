@@ -6,7 +6,7 @@
     <div class=page>
       {% set active_page = active_page|default('index') -%}
       <ul class="nav">
-        {% for item in nav_bar %}
+        {% for item in g.nav_bar %}
           <li{% if item.id == active_page %} class="active"{% endif
               %}><a href="{{ item.href }}">{{ item.caption }}</a></li>
         {% endfor %}
@@ -27,7 +27,7 @@
   <div class=footer>
     <div class=page>
       <ul class=toes>
-        {% for toe in toes %}
+        {% for toe in g.toes %}
           <li><a href="{{ toe.href }}">{{ toe.caption }}</a></li>
         {% endfor %}
       </ul>
