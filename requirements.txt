@@ -3,3 +3,4 @@ Jinja2
 Werkzeug
 boto3
 docopt
+jsonpickle

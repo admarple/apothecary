@@ -1,5 +1,6 @@
+import boto3
 from flask import Flask, render_template, g
-from . import model
+from .model import NavGroup, Nav, SectionGroup, Section, Couple
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
@@ -24,11 +25,15 @@ if not app.debug:
 
 @app.before_request
 def bind_common():
-    g.him = 'Alex Marple'
-    g.her = 'Tatiana McLauchlan'
-    g.nav_bar = [{"href": '/', "id": 'index', "caption": 'a M t'},
-               {"href": '/story/', "id": 'story', "caption": 'Our Story'}]
-    g.toes = [{"href": 'https://github.com/admarple/apothecary', "id": 'github', "caption": 'Source on GitHub'}]
+    g.dynamodb = boto3.resource('dynamodb')
+    header_nav = NavGroup.get(g.dynamodb, 'header_nav')
+    footer_nav = NavGroup.get(g.dynamodb, 'footer_nav')
+    couple = Couple.get(g.dynamodb, '0')
+
+    g.nav_bar = header_nav.navs
+    g.toes = footer_nav.navs
+    g.her = couple.her
+    g.him = couple.him
     g.title = g.her.split(' ')[0] + ' & ' + g.him.split(' ')[0]
 
 
@@ -39,11 +44,8 @@ def index():
 
 @app.route('/story/')
 def story():
-    section_group_id = 'story'
-    sections = [{"title": 'Tatiana', "text": 'Tatiana is the best :D'},
-                {"title": 'Alex', "text": 'Alex is a shit ball :P'},
-                {'title': 'Our Story', "text": 'Tat and Alex met in 2010 in Philadelphia. Their relationship' +
-                                               ' has taken them (by different paths) to New York.'}]
+    section_group = SectionGroup.get(g.dynamodb, 'story')
+    sections = section_group.sections
     return render_template('sections.html', **locals())
 
 if __name__ == '__main__':

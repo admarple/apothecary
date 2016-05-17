@@ -1,8 +1,8 @@
+import jsonpickle
 import json
 import logging
 import boto3
 import botocore.exceptions
-from abc import ABCMeta, abstractmethod
 from docopt import docopt
 """
 Usage:
@@ -17,7 +17,7 @@ Options:
 """
 
 
-class DAO(metaclass=ABCMeta):
+class DAO(object):
     schema = {
         'AttributeDefinitions': [
             {
@@ -80,11 +80,6 @@ class DAO(metaclass=ABCMeta):
         }
     }
 
-    @staticmethod
-    @abstractmethod
-    def from_json(dao_json):
-        pass
-
     @classmethod
     def create_table(cls, client):
         client.create_table(**cls.schema)
@@ -117,7 +112,7 @@ class DAO(metaclass=ABCMeta):
         )
         logging.info('DynamoDB consumed capacity from GetItem: %s', from_dynamo['ConsumedCapacity'])
 
-        return json.loads(from_dynamo['Item'], object_hook=cls.from_json)
+        return jsonpickle.decode(json.dumps(from_dynamo['Item']))
 
     @classmethod
     def table(cls, dynamodb):
@@ -125,14 +120,14 @@ class DAO(metaclass=ABCMeta):
 
     def put(self, dynamodb):
         from_dynamo = self.table(dynamodb).put_item(
-            Item=vars(self),
+            Item=json.loads(jsonpickle.encode(self)),
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from PutItem: %s', from_dynamo['ConsumedCapacity'])
 
     def update(self, dynamodb):
         from_dynamo = self.table(dynamodb).update_item(
-            Item=vars(self),
+            Item=json.loads(jsonpickle.encode(self)),
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from UpdateItem: %s', from_dynamo['ConsumedCapacity'])
@@ -164,24 +159,12 @@ class NavGroup(DAO):
         self.nav_group_id = nav_group_id
         self.navs = []
 
-    @staticmethod
-    def from_json(nav_group_json):
-        nav_group = NavGroup(nav_group_json['nav_group_id'])
-        if hasattr(nav_group_json, 'navs'):
-            for nav_json in nav_group_json['navs']:
-                nav_group.navs.append(Nav.from_json(nav_json))
-        return nav_group
-
 
 class Nav(object):
     def __init__(self, nav_id, href, caption):
         self.nav_id = nav_id
         self.href = href
         self.caption = caption
-
-    @staticmethod
-    def from_json(nav_json):
-        return Nav(nav_json['nav_id'], nav_json['href'], nav_json['caption'])
 
 
 class SectionGroup(DAO):
@@ -205,17 +188,9 @@ class SectionGroup(DAO):
         }
     }
 
-    def __init__(self, section_group_id, href, caption):
+    def __init__(self, section_group_id):
         self.section_group_id = section_group_id
         self.sections = []
-
-    @staticmethod
-    def from_json(section_group_json):
-        section_group = NavGroup(section_group_json['section_group_id'])
-        if hasattr(section_group_json, 'sections'):
-            for section_json in section_group_json['sections']:
-                section_group.navs.append(Section.from_json(section_json))
-        return section_group
 
 
 class Section(object):
@@ -224,9 +199,32 @@ class Section(object):
         self.title = title
         self.text = text
 
-    @staticmethod
-    def from_json(nav_json):
-        return Section(nav_json['section_id'], nav_json['title'], nav_json['text'])
+
+class Couple(DAO):
+    schema = {
+        'AttributeDefinitions': [
+            {
+                'AttributeName': 'couple_id',
+                'AttributeType': 'S'
+            },
+        ],
+        'TableName': 'Couple',
+        'KeySchema': [
+            {
+                'AttributeName': 'couple_id',
+                'KeyType': 'HASH'
+            },
+        ],
+        'ProvisionedThroughput': {
+            'ReadCapacityUnits': 3,
+            'WriteCapacityUnits': 3
+        }
+    }
+
+    def __init__(self, couple_id, her, him):
+        self.couple_id = couple_id
+        self.her = her
+        self.him = him
 
 
 def all_subclasses(cls):
@@ -265,6 +263,26 @@ def setup(fresh=False, prefix=''):
                 logging.info('Table for %s already exists', dao_class)
             else:
                 raise e
+
+    if fresh:
+        header_nav = NavGroup('header_nav')
+        header_nav.navs.extend([Nav('index', '/', 'a M t'), Nav('story', '/story/', 'Our Story')])
+        header_nav.put(dynamodb)
+
+        footer_nav = NavGroup('footer_nav')
+        footer_nav.navs.append(Nav('github', 'https://github.com/admarple/apothecary', 'Source on GitHub'))
+        footer_nav.put(dynamodb)
+
+        section_group = SectionGroup('story')
+        section_group.sections.append(Section('her', 'Tatiana', 'Tatiana is the best :D'))
+        section_group.sections.append(Section('him', 'Alex', 'Tatiana is the best :D'))
+        section_group.sections.append(Section('couple', 'Our Story', 'Tat and Alex met in 2010 in Philadelphia. ' +
+                                              ' After a stint on opposite coasts following school, they converged ' +
+                                              ' on New York in 2014 and were engaged in 2016.'))
+        section_group.put(dynamodb)
+
+        couple = Couple('0', 'Tatiana McLauchlan', 'Alex Marple')
+        couple.put(dynamodb)
 
 
 if __name__ == '__main__':
