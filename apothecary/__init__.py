@@ -47,7 +47,3 @@ def story():
     section_group = SectionGroup.get(g.dynamodb, 'story')
     sections = section_group.sections
     return render_template('sections.html', **locals())
-
-if __name__ == '__main__':
-    model.setup()
-    app.run()
