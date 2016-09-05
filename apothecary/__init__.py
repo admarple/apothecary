@@ -1,11 +1,9 @@
 import boto3
 from flask import Flask, render_template, g
 from .model import NavGroup, Nav, SectionGroup, Section, Couple
-from .auth import ApothecaryRealmDigestDB
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
-authDB = ApothecaryRealmDigestDB('ApothecaryAuth')
 
 if not app.debug:
     import logging
@@ -70,9 +68,3 @@ def area():
     area = SectionGroup.get(g.dynamodb, 'area')
     sections = area.sections
     return render_template('sections.html', **locals())
-
-
-@app.route('/needs_auth/')
-@authDB.requires_auth
-def test_auth():
-    return 'Successful auth!'

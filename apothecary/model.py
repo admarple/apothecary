@@ -3,19 +3,7 @@ import json
 import logging
 import boto3
 import botocore.exceptions
-from enum import Enum
 from docopt import docopt
-"""
-Usage:
-  model.py [options]
-
-Utility for setting up data model in persistent storage (currently DynamoDB)
-
-Options:
-  -f --fresh            Recreate fresh tables.  Will blow away any existing data.
-  -p --prefix <prefix>  Prefix table names.  Useful for dev environments.
-
-"""
 
 
 class DAO(object):
@@ -242,18 +230,18 @@ class Couple(DAO):
         self.him = him
 
 
-class User(DAO):
+class Guest(DAO):
     schema = {
         'AttributeDefinitions': [
             {
-                'AttributeName': 'user_id',
+                'AttributeName': 'guest_id',
                 'AttributeType': 'N'
             },
         ],
-        'TableName': 'User',
+        'TableName': 'Guest',
         'KeySchema': [
             {
-                'AttributeName': 'user_id',
+                'AttributeName': 'guest_id',
                 'KeyType': 'HASH'
             },
         ],
@@ -263,15 +251,8 @@ class User(DAO):
         }
     }
 
-    class UserType(Enum):
-        anonymous = 1
-        guest = 2
-        admin = 3
-
-    def __init__(self, user_id, pw_hash, types=[]):
+    def __init__(self, user_id):
         self.user_id = user_id
-        self.pw_hash = pw_hash
-        self.types = [UserType.anonymous].extend(types)
 
 
 def all_subclasses(cls):
@@ -354,8 +335,3 @@ def setup(fresh=False, prefix=''):
            + '\n St. Augustine'))
         area.sections.append(Section('shopping', 'Shopping', 'Shopping nearby ... '))
         area.put(dynamodb)
-
-
-if __name__ == '__main__':
-    options = docopt(__doc__)
-    setup(options['-f'])

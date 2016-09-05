@@ -19,6 +19,4 @@ if __name__ == '__main__':
     options = docopt(__doc__)
     logging.root.setLevel('INFO')
     model.setup(prefix=getpass.getuser() + '_', fresh=options['--fresh'])
-    authDB = FlaskRealmDigestDB('ApothecaryAuth')
-    authDB.add_user('admin', 'test')
     app.run(debug=True)

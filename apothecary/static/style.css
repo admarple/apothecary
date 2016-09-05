@@ -27,7 +27,6 @@ h2 {
     line-height: 50px;
     position: fixed;
     color: #fafafa;
-    /* background: #8c001a none repeat scroll 0 0; */
     background: #A3AC99 none repeat scroll 0 0;
     box-shadow: 0 0 5px rgba(74, 74, 72, 1);
     top: 0;
@@ -109,9 +108,3 @@ h2 {
 #index {
     padding: 10px;
 }
-/*.sections li {*/
-    /*margin: 0.8em 1.2em;*/
-/*}*/
-/*.sections li h2 {*/
-    /*margin-left: -1em;*/
-/*}*/
