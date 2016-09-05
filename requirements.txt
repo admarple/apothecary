@@ -4,3 +4,4 @@ Werkzeug
 boto3
 docopt
 jsonpickle
+-e git+https://github.com/locojay/flask-digestauth.git@eb4ea93dff4e01f72fc67b0779d9a226b555f5a1#egg=flask_digestauth

@@ -1,9 +1,11 @@
 import boto3
 from flask import Flask, render_template, g
 from .model import NavGroup, Nav, SectionGroup, Section, Couple
+from .auth import ApothecaryRealmDigestDB
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
+authDB = ApothecaryRealmDigestDB('ApothecaryAuth')
 
 if not app.debug:
     import logging
@@ -44,6 +46,33 @@ def index():
 
 @app.route('/story/')
 def story():
-    section_group = SectionGroup.get(g.dynamodb, 'story')
-    sections = section_group.sections
+    story = SectionGroup.get(g.dynamodb, 'story')
+    sections = story.sections
     return render_template('sections.html', **locals())
+
+
+@app.route('/event/')
+def event():
+    event = SectionGroup.get(g.dynamodb, 'event')
+    sections = event.sections
+    return render_template('sections.html', **locals())
+
+
+@app.route('/travel/')
+def travel():
+    travel = SectionGroup.get(g.dynamodb, 'travel')
+    sections = travel.sections
+    return render_template('sections.html', **locals())
+
+
+@app.route('/area/')
+def area():
+    area = SectionGroup.get(g.dynamodb, 'area')
+    sections = area.sections
+    return render_template('sections.html', **locals())
+
+
+@app.route('/needs_auth/')
+@authDB.requires_auth
+def test_auth():
+    return 'Successful auth!'

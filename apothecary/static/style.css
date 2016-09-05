@@ -27,8 +27,9 @@ h2 {
     line-height: 50px;
     position: fixed;
     color: #fafafa;
-    background: #8c001a none repeat scroll 0 0;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    /* background: #8c001a none repeat scroll 0 0; */
+    background: #A3AC99 none repeat scroll 0 0;
+    box-shadow: 0 0 5px rgba(74, 74, 72, 1);
     top: 0;
     z-index: 99;
     width: 100%;
@@ -65,7 +66,7 @@ h2 {
     text-decoration: none;
 }
 .header a:hover {
-    color: #222222
+    color: #556246
 }
 .footer a:hover {
     color: #777777;

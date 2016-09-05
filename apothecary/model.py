@@ -3,6 +3,7 @@ import json
 import logging
 import boto3
 import botocore.exceptions
+from enum import Enum
 from docopt import docopt
 """
 Usage:
@@ -131,7 +132,21 @@ class DAO(object):
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from UpdateItem: %s', from_dynamo['ConsumedCapacity'])
-        pass
+
+    def delete(self, dynamodb):
+        hash_key = cls.get_hash_key()['AttributeName']
+        hash_key_value = getattr(self, hash_key)
+        keys = { hash_key: hash_key_value }
+        if cls.get_range_key():
+            range_key = cls.get_range_key()['AttributeName']
+            range_key_value = getattr(self, range_key)
+            keys[range_key] = range_key_value
+
+        from_dynamo = self.table(dynamodb).delete_item(
+            Key=keys,
+            ReturnConsumedCapacity='INDEXES'
+        )
+        logging.info('DynamoDB consumed capacity from DeleteItem: %s', from_dynamo['ConsumedCapacity'])
 
 
 class NavGroup(DAO):
@@ -227,6 +242,38 @@ class Couple(DAO):
         self.him = him
 
 
+class User(DAO):
+    schema = {
+        'AttributeDefinitions': [
+            {
+                'AttributeName': 'user_id',
+                'AttributeType': 'N'
+            },
+        ],
+        'TableName': 'User',
+        'KeySchema': [
+            {
+                'AttributeName': 'user_id',
+                'KeyType': 'HASH'
+            },
+        ],
+        'ProvisionedThroughput': {
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
+        }
+    }
+
+    class UserType(Enum):
+        anonymous = 1
+        guest = 2
+        admin = 3
+
+    def __init__(self, user_id, pw_hash, types=[]):
+        self.user_id = user_id
+        self.pw_hash = pw_hash
+        self.types = [UserType.anonymous].extend(types)
+
+
 def all_subclasses(cls):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
@@ -266,23 +313,47 @@ def setup(fresh=False, prefix=''):
 
     if fresh:
         header_nav = NavGroup('header_nav')
-        header_nav.navs.extend([Nav('index', '/', 'a M t'), Nav('story', '/story/', 'Our Story')])
+        header_nav.navs.extend([
+            Nav('index', '/', 'a M t'),
+            Nav('story', '/story/', 'Our Story'),
+            Nav('event', '/event/', 'Event Info'),
+            Nav('travel', '/travel/', 'Travel Info'),
+            Nav('area', '/area/', 'In the Area')
+        ])
         header_nav.put(dynamodb)
 
         footer_nav = NavGroup('footer_nav')
         footer_nav.navs.append(Nav('github', 'https://github.com/admarple/apothecary', 'Source on GitHub'))
         footer_nav.put(dynamodb)
 
-        section_group = SectionGroup('story')
-        section_group.sections.append(Section('her', 'Tatiana', 'Tatiana is the best :D'))
-        section_group.sections.append(Section('him', 'Alex', 'Tatiana is the best :D'))
-        section_group.sections.append(Section('couple', 'Our Story', 'Tat and Alex met in 2010 in Philadelphia. ' +
-                                              ' After a stint on opposite coasts following school, they converged ' +
-                                              ' on New York in 2014 and were engaged in 2016.'))
-        section_group.put(dynamodb)
+        story = SectionGroup('story')
+        story.sections.append(Section('her', 'Tatiana', 'Tatiana is the best :D'))
+        story.sections.append(Section('him', 'Alex', 'Tatiana is the best :D'))
+        story.sections.append(Section('couple', 'Our Story', 'Tat and Alex met in 2010 in Philadelphia. ' +
+                                      ' After a stint on opposite coasts following school, they converged ' +
+                                      ' on New York in 2014 and were engaged in 2016.'))
+        story.put(dynamodb)
 
         couple = Couple('0', 'Tatiana McLauchlan', 'Alex Marple')
         couple.put(dynamodb)
+
+        event = SectionGroup('event')
+        event.sections.append(Section('ceremony', 'Ceremony', 'The ceremony will be held at ... '))
+        event.sections.append(Section('reception', 'Reception', 'The reception will be held at Atlantic Beach Country Club. ...'))
+        event.put(dynamodb)
+
+        travel = SectionGroup('travel')
+        travel.sections.append(Section('getting_there', 'Getting There', 'Jacksonville International Airport ... '))
+        travel.sections.append(Section('accommodations', 'Accommodations', ' ... '))
+        travel.put(dynamodb)
+
+        area = SectionGroup('area')
+        area.sections.append(Section('dining', 'Dining', 'Dining nearby ... '))
+        area.sections.append(Section('activities', 'Activities', 'Activities nearby ... '
+           + '\n Atlantic Beach & Neptune Beach'
+           + '\n St. Augustine'))
+        area.sections.append(Section('shopping', 'Shopping', 'Shopping nearby ... '))
+        area.put(dynamodb)
 
 
 if __name__ == '__main__':
