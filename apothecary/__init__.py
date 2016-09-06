@@ -1,9 +1,11 @@
 import boto3
 from flask import Flask, render_template, g
+from flask.ext.misaka import Misaka
 from .model import NavGroup, Nav, SectionGroup, Section, Couple
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
+Misaka(app)
 
 if not app.debug:
     import logging
@@ -44,27 +46,31 @@ def index():
 
 @app.route('/story/')
 def story():
-    story = SectionGroup.get(g.dynamodb, 'story')
+    section_group_id = 'story'
+    story = SectionGroup.get(g.dynamodb, section_group_id)
     sections = story.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/event/')
 def event():
-    event = SectionGroup.get(g.dynamodb, 'event')
+    section_group_id = 'event'
+    event = SectionGroup.get(g.dynamodb, section_group_id)
     sections = event.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/travel/')
 def travel():
-    travel = SectionGroup.get(g.dynamodb, 'travel')
+    section_group_id = 'travel'
+    travel = SectionGroup.get(g.dynamodb, section_group_id)
     sections = travel.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/area/')
 def area():
-    area = SectionGroup.get(g.dynamodb, 'area')
+    section_group_id = 'area'
+    area = SectionGroup.get(g.dynamodb, section_group_id)
     sections = area.sections
     return render_template('sections.html', **locals())

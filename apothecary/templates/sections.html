@@ -3,7 +3,7 @@
 {% block body %}
   <ul class=sections id={{ section_group_id }}>
     {% for section in sections %}
-      <li><h2>{{ section.title }}</h2>{{ section.text|safe }}
+      <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}
     {% else %}
       <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em>
     {% endfor %}

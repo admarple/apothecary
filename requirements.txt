@@ -1,6 +1,7 @@
 Flask
 Jinja2
 Werkzeug
+Flask-Misaka
 boto3
 docopt
 jsonpickle

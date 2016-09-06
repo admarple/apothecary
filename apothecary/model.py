@@ -259,7 +259,7 @@ def all_subclasses(cls):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
 
-def setup(fresh=False, prefix=''):
+def setup(fresh_data=False, fresh_tables=False, prefix=''):
     client = boto3.client('dynamodb')
     dynamodb = boto3.resource('dynamodb')
 
@@ -270,7 +270,7 @@ def setup(fresh=False, prefix=''):
         dao_table = dao_class.table(dynamodb)
 
         # optionally delete the existing table
-        if fresh:
+        if fresh_tables:
             try:
                 dao_table.delete()
                 dao_table.wait_until_not_exists()
@@ -292,7 +292,7 @@ def setup(fresh=False, prefix=''):
             else:
                 raise e
 
-    if fresh:
+    if fresh_data:
         header_nav = NavGroup('header_nav')
         header_nav.navs.extend([
             Nav('index', '/', 'a M t'),
@@ -325,13 +325,102 @@ def setup(fresh=False, prefix=''):
 
         travel = SectionGroup('travel')
         travel.sections.append(Section('getting_there', 'Getting There', 'Jacksonville International Airport ... '))
-        travel.sections.append(Section('accommodations', 'Accommodations', ' ... '))
+        travel.sections.append(Section('accommodations', 'Accommodations',
+            '<a href="https://www.oneoceanresort.com/special-pkg?gclid=CK2BqZiQ-c4CFVVahgodJwsCaQ">One Ocean</a>:'
+            + ' ~$250 / night, 1.5 Miles / 6 min from reception'
+            + '<br/>'
+            + '<a href="http://www.marriott.com/hotels/travel/jaxjv-courtyard-jacksonville-beach-oceanfront/">Courtyard Marriott</a>:'
+            + ' $210 + / Night, 3 Miles / 9 min from reception'
+            + '<br/>'
+            + '<a href="http://www.marriott.com/hotels/travel/jaxjb-fairfield-inn-and-suites-jacksonville-beach/?scid=bb1a189a-fec3-4d19-a255-54ba596febe2">Fairfield Inn & Suites</a>:'
+            + ' CURRENTLY NO ROOMS AVAILABLE'
+            + '<br/>'
+            + '<a href="http://www.bestwesternjacksonvillebeach.com/">Best Western</a>:'
+            + ' $200 + / Night, 3.9 Miles / 12 min from reception'
+            + '<br/>'
+            + '<a href="http://www.fourpointsjacksonvillebeach.com/">Four Points by Sheraton</a>:'
+            + ' ~$300/ night, 4 Miles / 12 min from reception'
+            + '<br/>'
+            + '<a href="http://www.pontevedra.com/inn_and_club/lodginginnclub/">Ponte Vedra Inn & Club</a>:'
+            + ' ~$350 / night, 7.3 Miles / 20min  from the reception'))
         travel.put(dynamodb)
 
         area = SectionGroup('area')
-        area.sections.append(Section('dining', 'Dining', 'Dining nearby ... '))
-        area.sections.append(Section('activities', 'Activities', 'Activities nearby ... '
-           + '\n Atlantic Beach & Neptune Beach'
-           + '\n St. Augustine'))
-        area.sections.append(Section('shopping', 'Shopping', 'Shopping nearby ... '))
+        area.sections.append(Section('neptune_beach', 'Neptune Beach',
+            '''The City of Neptune Beach is a small, quiet coastal community nestled on the northeast coast of Florida between Atlantic Beach and Jacksonville Beach. Neptune Beach has a comfortable, casual and laid-back atmosphere that causes people of all ages to flock here to enjoy the beach. The hard-packed sand is great for cycling and the surf is super for the avid surfer. If you're an early bird, catch the sun rising above the ocean, it's a site to behold. The inviting, pedestrian friendly area offers many boutiques and restaurants and in close proximity to a variety of hotels.
+              <br/>
+              The name Neptune Beach has origins dating back to the year 1922 when Dan Wheeler built his own train station next to his home and named it Neptune. Mr. Wheeler had been informed that if he were to build a station, the train would be required to stop. The construction of the station eliminated his walking to Mayport in order to take the train to work in Jacksonville. The station was located where the Sea Turtle Inn is now located.
+              The area remained a part of Jacksonville Beach until the tax revolt of 1931, when on August 11, the residents of Neptune voted 113 to 31 to secede from Jacksonville Beach and incorporate the City of Neptune Beach.'''))
+        area.sections.append(Section('restaurants', 'Restaurants',
+            '<a href="http://thenorthbeachfishcamp.com/">The North Beach Fish Camp</a>:'
+            + ' Our favorite restaurant with a neighborhood feel and the freshest seafood. Tat\'s favorite is the fried'
+            + ' shrimp platter.'
+            + '<br/>'
+            + '<a href="http://www.whitsfrozencustard.com">Whit\'s Frozen Custard</a>:'
+            + ' Cool off with a sweet treat after a day in the Jacksonville heat. Tat & Alex\'s favorite flavors are'
+            + ' Mud Pie and Black Raspberry Chip.'
+            + '<br/>'
+            + '<a href="http://www.tacolu.com/">TacoLu</a>:'
+            + ' A broad selection of tacos, and a broader selection of Tequila, for anyone wanting to relive Alex &'
+            + ' Tat\'s impromptu Mexico trip.'
+            + '<br/>'
+            + '<a href="http://www.allmenus.com/fl/jacksonville/109176-angies-subs/menu/">Angie\'s Subs</a>'
+            + ' Quirky sub shop, showcased by the fact that the most popular sandwich is "The Peruvian".'
+            + ' Enjoy with an endless glass of Tat\'s favorite sweet tea.'
+            + ' Extracurricular activity: ask if anyone knows what a "hoagie" is.'
+            + '<br/>'
+            + '<a href="http://sogrocoffee.com/menu/">Southern Grounds Coffee</a>:'
+            + ' A casual cafe with outdoor seating. Tat loves both the iced chai latte and the cappuccino, and a'
+            + ' Caprese Panini when she\'s feeling peckish.'))
+        area.sections.append(Section('rentals', 'Beach Rentals',
+            '<a href="http://www.beachliferentals.com/">Beach Life Rentals</a>:'
+            + ' Rental beach gear, along with bike rentals for anyone looking to enjoy Neptune Beach on two wheels.'
+            + '<br/>'
+            + '<a href="http://www.eastcoastsportrentals.info/services.htm">East Coast Sport Rentals</a>:'
+            + ' More of the same, but perhaps more convenient for anyone staying closer to Jax Beach.'))
+        area.sections.append(Section('nightlife', 'Nightlife',
+            '<a href="http://flyingiguana.com/">The Flying Iguana</a>:'
+            + ' '
+            + '<br/>'
+            + '<a href="http://www.lemonbarjax.com/">The Lemon Bar</a>:'
+            + ' Tat may not love lemons, but she has nothing against this unpretentious bar by the beach.'))
+        area.sections.append(Section('around_jax', 'Around Jacksonville',
+            '<a href="http://www.oldcity.com/">St. Augustine</a>:'
+            + ' There is plenty to do in the U.S.\'s oldest city, St. Augustine. In fact, the first time Alex visited'
+            + ' Tat in Jacksonville, they visited the Castillo de San Marcos National Monument, the Fort Matanzas, and'
+            + ' the Lightner Museum. Alex even bought some tea at the Spice & Tea Exchange right off the historic St.'
+            + ' George Street. On your ~50min drive back to Jax / Neptune beach, perhaps stop for a tree-shaded dinner'
+            + ' on the water at Tat\'s favorite outdoor restaurant, <a href="http://www.capsonthewater.com/">Cap\'s</a>'
+            + '<br/>'
+            + '<a href="http://www.simon.com/mall/st-johns-town-center">St. John\'s Town Center</a>:'
+            + ' Jacksonville has an outdoor shopping mall with some great chain restaurants such as '
+            + ' <a href="https://www.cantinalaredo.com">Cantina Laredo</a>.'
+            + ' <a href="http://www.cinemark.com/theatre-detail.aspx?node_id=1547&#4/28/2017">Tinseltown</a> movie'
+            + ' theater is near by as well where you may find Tat in a sweatshirt watching an action movie with Alex.'
+            + '<br/>'
+            + 'For those of you who golf, make sure the check out the'
+            + ' <a href="http://www.worldgolfhalloffame.org/">World Golf Hall of Fame</a> (40min drive from Neptune'
+            + ' Beach) and <a href="http://www.pgatour.com/tournaments/the-players-championship.html">TPC Sawgrass</a>'
+            + ' (25min drive from Neptune Beach).'
+            + '<br/>'
+            + '<a href="http://www.cummer.org/">The Cummer Museum</a>:'
+            + ' The Cummer Museum not only holds one of the finest art collections in the Southeast but is also home to'
+            + ' gorgeous outdoor gardens. If you are planning on spending time in down town Jax this is a must see.'
+            + '<br/>'))
+        area.sections.append(Section('beyond', 'Beyond Jacksonville',
+            'Tat & Alex hope that those with a bit more wanderlust have a chance to visit other parts of Florida either'
+            + ' before or after the wedding.'
+            + '<br/>'
+            + '<br/>'
+            + '<a href="https://www.kennedyspacecenter.com/">Kennedy Space Center</a>:'
+            + ' For anyone with a tendency to geek out about space flight, NASA\'s Kennedy Space Center is about 2.5'
+            + ' hours\' drive from Neptune Beach.'
+            + '<br/>'
+            + '<a href="https://disneyworld.disney.go.com/">Disney</a> & <a href="https://www.universalorlando.com/">Universal</a>:'
+            + ' Orlando is home to both Disney and Universal theme parks, and is 3 hours by car from Neptune Beach. If'
+            + ' you do stop by, Tat\'s favorite rise is <a href="https://www.universalorlando.com/Rides/Islands-of-Adventure/Dragon-Challenge.aspx">"Dragon Challenge"</a>'
+            + ' - formerly "Fire & Ice" - in Islands of Adventure.'
+            + '<br/>'
+            + '<a href="http://www.visitflorida.com/en-us.html">visitflorida.com</a>:'
+            + ' additional info on destinations in the Sunshine State.'))
         area.put(dynamodb)
