@@ -7,7 +7,7 @@
       {% set active_page = active_page|default('index') -%}
       <ul class="nav">
         {% for item in g.nav_bar %}
-          <li{% if item.id == active_page %} class="active"{% endif%}>
+          <li {% if item.nav_id == active_page %} class="active" {% endif %}>
             <a href="{{ item.href }}">{{ item.caption }}</a>
           </li>
         {% endfor %}

@@ -27,7 +27,7 @@ h2 {
     line-height: 50px;
     position: fixed;
     color: #fafafa;
-    background: #A3AC99 none repeat scroll 0 0;
+    background: #a3ac99 none repeat scroll 0 0;
     box-shadow: 0 0 5px rgba(74, 74, 72, 1);
     top: 0;
     z-index: 99;
@@ -44,8 +44,8 @@ h2 {
 }
 
 .nav .active {
-    color: #8c001a;
-    background: #fafafa;
+    color: #fafafa;
+    background: #556246;
     display: inline-block;
 }
 .nav > li {
@@ -65,6 +65,9 @@ h2 {
 }
 .header a:hover {
     color: #556246
+}
+.header .active a:hover {
+    color: #a3ac99
 }
 .footer a:hover {
     color: #777777;

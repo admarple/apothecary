@@ -46,31 +46,31 @@ def index():
 
 @app.route('/story/')
 def story():
-    section_group_id = 'story'
-    story = SectionGroup.get(g.dynamodb, section_group_id)
+    active_page = 'story'
+    story = SectionGroup.get(g.dynamodb, active_page)
     sections = story.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/event/')
 def event():
-    section_group_id = 'event'
-    event = SectionGroup.get(g.dynamodb, section_group_id)
+    active_page = 'event'
+    event = SectionGroup.get(g.dynamodb, active_page)
     sections = event.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/travel/')
 def travel():
-    section_group_id = 'travel'
-    travel = SectionGroup.get(g.dynamodb, section_group_id)
+    active_page = 'travel'
+    travel = SectionGroup.get(g.dynamodb, active_page)
     sections = travel.sections
     return render_template('sections.html', **locals())
 
 
 @app.route('/area/')
 def area():
-    section_group_id = 'area'
-    area = SectionGroup.get(g.dynamodb, section_group_id)
+    active_page = 'area'
+    area = SectionGroup.get(g.dynamodb, active_page)
     sections = area.sections
     return render_template('sections.html', **locals())
