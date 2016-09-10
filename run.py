@@ -6,6 +6,7 @@ Usage:
 Utility for running apothecary in a development environment
 
 Options:
+  --log-level <level>       Set the log level [default: INFO]
   --fresh-tables            Recreate fresh tables.  Will blow away any existing data.
   --fresh-data              Add all of the data from setup.
 
@@ -18,8 +19,8 @@ from docopt import docopt
 
 if __name__ == '__main__':
     options = docopt(__doc__)
-    logging.root.setLevel('INFO')
+    logging.root.setLevel(options['--log-level'])
     model.setup(prefix=getpass.getuser() + '_',
         fresh_data=options['--fresh-data'],
         fresh_tables=options['--fresh-tables'])
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=True)

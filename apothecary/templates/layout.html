@@ -8,7 +8,7 @@
       <ul class="nav">
         {% for item in g.nav_bar %}
           <li {% if item.nav_id == active_page %} class="active" {% endif %}>
-            <a href="{{ item.href }}">{{ item.caption }}</a>
+            <a href="{{ item.href }}">{{ item.caption|safe }}</a>
           </li>
         {% endfor %}
       </ul>

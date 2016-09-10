@@ -1,7 +1,7 @@
 import boto3
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request, redirect, url_for
 from flask.ext.misaka import Misaka
-from .model import NavGroup, Nav, SectionGroup, Section, Couple
+from .model import NavGroup, Nav, SectionGroup, Section, Couple, RSVP
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
@@ -57,7 +57,7 @@ def event():
     active_page = 'event'
     event = SectionGroup.get(g.dynamodb, active_page)
     sections = event.sections
-    return render_template('sections.html', **locals())
+    return render_template('event.html', **locals())
 
 
 @app.route('/travel/')
@@ -74,3 +74,17 @@ def area():
     area = SectionGroup.get(g.dynamodb, active_page)
     sections = area.sections
     return render_template('sections.html', **locals())
+
+@app.route('/save-the-date/', methods=['GET', 'POST'])
+def save_the_date():
+    if request.method == 'GET':
+        return redirect(url_for('event'))
+    elif request.method == 'POST':
+        rsvp = RSVP(request.form['name'],
+                    request.form['email'],
+                    request.form['guests'],
+                    request.form.getlist('hotel_preference'),
+                    request.form['notes'],
+        )
+        rsvp.put(g.dynamodb)
+        return render_template('save-the-date-submit.html', **locals())

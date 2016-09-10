@@ -1,6 +1,21 @@
+#!/usr/bin/env python
+"""
+Usage:
+  model.py [options]
+
+Utility for setting up data model in persistent storage (currently DynamoDB)
+
+Options:
+  --fresh-tables            Recreate fresh tables.  Will blow away any existing data.
+  --fresh-data              Add all of the data from setup.
+  -p --prefix <prefix>      Prefix table names.  Useful for dev environments.
+
+"""
+
 import jsonpickle
 import json
 import logging
+import re
 import boto3
 import botocore.exceptions
 from docopt import docopt
@@ -255,6 +270,36 @@ class Guest(DAO):
         self.user_id = user_id
 
 
+class RSVP(DAO):
+    schema = {
+        'AttributeDefinitions': [
+            {
+                'AttributeName': 'rsvp_id',
+                'AttributeType': 'S'
+            },
+        ],
+        'TableName': 'RSVP',
+        'KeySchema': [
+            {
+                'AttributeName': 'rsvp_id',
+                'KeyType': 'HASH'
+            },
+        ],
+        'ProvisionedThroughput': {
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
+        }
+    }
+
+    def __init__(self, name, email, guests, hotel_preference, notes):
+        self.rsvp_id = re.sub(' +', ' ', name.lower().strip())
+        self.name = name
+        self.email = email
+        self.guests = guests
+        self.hotel_preference = hotel_preference
+        self.notes = notes
+
+
 def all_subclasses(cls):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
@@ -424,3 +469,8 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
             + '<a href="http://www.visitflorida.com/en-us.html">visitflorida.com</a>:'
             + ' additional info on destinations in the Sunshine State.'))
         area.put(dynamodb)
+
+if __name__ == '__main__':
+    setup(prefix=options['--prefix'] + '_',
+          fresh_data=options['--fresh-data'],
+          fresh_tables=options['--fresh-tables'])

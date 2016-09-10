@@ -41,6 +41,7 @@ h2 {
     color: #fafafa;
     width: 100%;
     position: absolute;
+    bottom: 0;
 }
 
 .nav .active {
@@ -101,4 +102,9 @@ h2 {
 
 #index {
     padding: 10px;
+}
+
+.large-text-input {
+    width: 200px;
+    height: 75px;
 }
