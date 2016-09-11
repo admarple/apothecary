@@ -82,6 +82,7 @@ def save_the_date():
     elif request.method == 'POST':
         rsvp = RSVP(request.form['name'],
                     request.form['email'],
+                    request.form['address'],
                     request.form['guests'],
                     request.form.getlist('hotel_preference'),
                     request.form['notes'],

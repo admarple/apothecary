@@ -291,17 +291,22 @@ class RSVP(DAO):
         }
     }
 
-    def __init__(self, name, email, guests, hotel_preference, notes):
+    def __init__(self, name, email, address, guests, hotel_preference, notes):
         self.rsvp_id = re.sub(' +', ' ', name.lower().strip())
-        self.name = name
-        self.email = email
-        self.guests = guests
-        self.hotel_preference = hotel_preference
-        self.notes = notes
+        self.name = non_null(name)
+        self.email = non_null(email)
+        self.address = non_null(address)
+        self.guests = non_null(guests)
+        self.hotel_preference = non_null(hotel_preference)
+        self.notes = non_null(notes)
 
 
 def all_subclasses(cls):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
+
+
+def non_null(thing):
+    return thing or 'N/A'
 
 
 def setup(fresh_data=False, fresh_tables=False, prefix=''):
