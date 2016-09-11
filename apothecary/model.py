@@ -13,12 +13,13 @@ Options:
 """
 
 import jsonpickle
-import json
+import simplejson as json
 import logging
 import re
 import boto3
 import botocore.exceptions
 from docopt import docopt
+from decimal import Decimal
 
 
 class DAO(object):
@@ -116,22 +117,45 @@ class DAO(object):
         )
         logging.info('DynamoDB consumed capacity from GetItem: %s', from_dynamo['ConsumedCapacity'])
 
-        return jsonpickle.decode(json.dumps(from_dynamo['Item']))
+        return jsonpickle.decode(json.dumps(from_dynamo['Item'], use_decimal=True))
+
+    @classmethod
+    def scan(cls, dynamodb):
+        table = cls.table(dynamodb)
+        from_dynamo = table.scan()
+        while True:
+            last_key = from_dynamo.get('LastEvaluatedKey')
+            for item in from_dynamo.get('Items'):
+                logging.info('loaded: {0}'.format(item))
+                dumped = json.dumps(item, use_decimal=True)
+                logging.info('dumped: {0}'.format(dumped))
+                unpickled = jsonpickle.decode(dumped)
+                logging.info('unpickled: {0}'.format(unpickled))
+                yield unpickled
+            if not last_key:
+                break
+            else:
+                from_dynamo = table.scan(ExclusiveStartKey=last_key)
 
     @classmethod
     def table(cls, dynamodb):
         return dynamodb.Table(cls.schema['TableName'])
 
     def put(self, dynamodb):
+        logging.info('self: {0}'.format(self))
+        pickled = jsonpickle.encode(self)
+        logging.info('pickled: {0}'.format(pickled))
+        re_jsoned = json.loads(pickled, use_decimal=True)
+        logging.info('re-jsoned: {0}'.format(re_jsoned))
         from_dynamo = self.table(dynamodb).put_item(
-            Item=json.loads(jsonpickle.encode(self)),
+            Item=re_jsoned,
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from PutItem: %s', from_dynamo['ConsumedCapacity'])
 
     def update(self, dynamodb):
         from_dynamo = self.table(dynamodb).update_item(
-            Item=json.loads(jsonpickle.encode(self)),
+            Item=json.loads(jsonpickle.encode(self), use_decimal=True),
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from UpdateItem: %s', from_dynamo['ConsumedCapacity'])
@@ -168,8 +192,8 @@ class NavGroup(DAO):
             },
         ],
         'ProvisionedThroughput': {
-            'ReadCapacityUnits': 3,
-            'WriteCapacityUnits': 3
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
         }
     }
 
@@ -201,8 +225,8 @@ class SectionGroup(DAO):
             },
         ],
         'ProvisionedThroughput': {
-            'ReadCapacityUnits': 3,
-            'WriteCapacityUnits': 3
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
         }
     }
 
@@ -234,8 +258,8 @@ class Couple(DAO):
             },
         ],
         'ProvisionedThroughput': {
-            'ReadCapacityUnits': 3,
-            'WriteCapacityUnits': 3
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
         }
     }
 
@@ -261,8 +285,8 @@ class Guest(DAO):
             },
         ],
         'ProvisionedThroughput': {
-            'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'ReadCapacityUnits': 1,
+            'WriteCapacityUnits': 1
         }
     }
 
@@ -286,8 +310,8 @@ class RSVP(DAO):
             },
         ],
         'ProvisionedThroughput': {
-            'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'ReadCapacityUnits': 1,
+            'WriteCapacityUnits': 1
         }
     }
 
@@ -301,12 +325,49 @@ class RSVP(DAO):
         self.notes = non_null(notes)
 
 
+class Accommodation(DAO):
+    schema = {
+        'AttributeDefinitions': [
+            {
+                'AttributeName': 'name',
+                'AttributeType': 'S'
+            },
+        ],
+        'TableName': 'Accommodation',
+        'KeySchema': [
+            {
+                'AttributeName': 'name',
+                'KeyType': 'HASH'
+            },
+        ],
+        'ProvisionedThroughput': {
+            'ReadCapacityUnits': 2,
+            'WriteCapacityUnits': 2
+        }
+    }
+
+    def __init__(self, name, link, price, miles_to_reception, driving_minutes_to_reception):
+        self.name = name
+        self.link = link
+        self.price = price
+        self.miles_to_reception = miles_to_reception
+        self.driving_minutes_to_reception = driving_minutes_to_reception
+
+
 def all_subclasses(cls):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
 
 def non_null(thing):
     return thing or 'N/A'
+
+
+# Needed to get json, jsonpickle, and boto3 to play nicely with Decimals
+class DecimalHandler(jsonpickle.handlers.BaseHandler):
+    def flatten(self, obj, data):
+        return float(str(obj))
+
+# jsonpickle.handlers.registry.register(Decimal, DecimalHandler)
 
 
 def setup(fresh_data=False, fresh_tables=False, prefix=''):
@@ -349,7 +410,8 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
             Nav('story', '/story/', 'Our Story'),
             Nav('event', '/event/', 'Event Info'),
             Nav('travel', '/travel/', 'Travel Info'),
-            Nav('area', '/area/', 'In the Area')
+            Nav('area', '/area/', 'In the Area'),
+            Nav('save-the-date', '/save-the-date/', 'Save the Date')
         ])
         header_nav.put(dynamodb)
 
@@ -375,25 +437,47 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
 
         travel = SectionGroup('travel')
         travel.sections.append(Section('getting_there', 'Getting There', 'Jacksonville International Airport ... '))
-        travel.sections.append(Section('accommodations', 'Accommodations',
-            '<a href="https://www.oneoceanresort.com/special-pkg?gclid=CK2BqZiQ-c4CFVVahgodJwsCaQ">One Ocean</a>:'
-            + ' ~$250 / night, 1.5 Miles / 6 min from reception'
-            + '<br/>'
-            + '<a href="http://www.marriott.com/hotels/travel/jaxjv-courtyard-jacksonville-beach-oceanfront/">Courtyard Marriott</a>:'
-            + ' $210 + / Night, 3 Miles / 9 min from reception'
-            + '<br/>'
-            + '<a href="http://www.marriott.com/hotels/travel/jaxjb-fairfield-inn-and-suites-jacksonville-beach/?scid=bb1a189a-fec3-4d19-a255-54ba596febe2">Fairfield Inn & Suites</a>:'
-            + ' CURRENTLY NO ROOMS AVAILABLE'
-            + '<br/>'
-            + '<a href="http://www.bestwesternjacksonvillebeach.com/">Best Western</a>:'
-            + ' $200 + / Night, 3.9 Miles / 12 min from reception'
-            + '<br/>'
-            + '<a href="http://www.fourpointsjacksonvillebeach.com/">Four Points by Sheraton</a>:'
-            + ' ~$300/ night, 4 Miles / 12 min from reception'
-            + '<br/>'
-            + '<a href="http://www.pontevedra.com/inn_and_club/lodginginnclub/">Ponte Vedra Inn & Club</a>:'
-            + ' ~$350 / night, 7.3 Miles / 20min  from the reception'))
         travel.put(dynamodb)
+
+        accommodations = []
+        accommodations.append(Accommodation(
+                                  'One Ocean',
+                                  'https://www.oneoceanresort.com/',
+                                  '~$250 / night',
+                                  Decimal('1.5'),
+                                  6))
+        accommodations.append(Accommodation(
+                                  'Courtyard Marriott',
+                                  'http://www.marriott.com/hotels/travel/jaxjv-courtyard-jacksonville-beach-oceanfront/',
+                                  '$210 + / night',
+                                  Decimal('3'),
+                                  9))
+        accommodations.append(Accommodation(
+                                  'Fairfield Inn & Suites',
+                                  'http://www.marriott.com/hotels/travel/jaxjb-fairfield-inn-and-suites-jacksonville-beach',
+                                  'CURRENTLY NO ROOMS AVAILABLE',
+                                  Decimal('3'),
+                                  9))
+        accommodations.append(Accommodation(
+                                  'Best Western',
+                                  'http://www.bestwesternjacksonvillebeach.com/',
+                                  '$200 + / night',
+                                  Decimal('3.9'),
+                                  12))
+        accommodations.append(Accommodation(
+                                  'Four Points by Sheraton',
+                                  'http://www.fourpointsjacksonvillebeach.com/',
+                                  '~ $300 / night',
+                                  Decimal('4'),
+                                  12))
+        accommodations.append(Accommodation(
+                                  'Ponte Vedra Inn & Club',
+                                  'http://www.pontevedra.com/inn_and_club/lodginginnclub/',
+                                  '~ $300 / night',
+                                  Decimal('7.3'),
+                                  20))
+        for accommodation in accommodations:
+            accommodation.put(dynamodb)
 
         area = SectionGroup('area')
         area.sections.append(Section('neptune_beach', 'Neptune Beach',
@@ -476,6 +560,7 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
         area.put(dynamodb)
 
 if __name__ == '__main__':
+    options = docopt(__doc__)
     setup(prefix=options['--prefix'] + '_',
           fresh_data=options['--fresh-data'],
           fresh_tables=options['--fresh-tables'])

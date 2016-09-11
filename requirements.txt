@@ -5,3 +5,4 @@ Flask-Misaka
 boto3
 docopt
 jsonpickle
+simplejson

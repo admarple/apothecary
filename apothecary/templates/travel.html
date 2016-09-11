@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=sections id={{ section_group_id }}>
+    {% for section in sections %}
+      <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}</li>
+    {% else %}
+      <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em></li>
+    {% endfor %}
+      <li><h2>Accommodations</h2></li>
+      {% for accommodation in accommodations %}
+        <a target="_blank" href="{{ accommodation.link }}">{{ accommodation.name }}</a>:
+          {{ accommodation.price }} , {{ accommodation.miles_to_reception }} miles / {{ accommodation.driving_minutes_to_reception }} minutes from reception
+        <br/>
+      {% endfor %}
+  </ul>
+{% endblock %}
