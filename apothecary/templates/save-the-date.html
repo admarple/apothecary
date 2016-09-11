@@ -11,9 +11,9 @@
   <form id="save-the-date-form" action="{{ url_for('save_the_date') }}" method="post">
     Name: <input name="name" type="text" maxlength="100"/><br/>
     Email: <input name="email" type="email" maxlength="100"/><br/>
-    Address: <br/>
+    Mailing Address: <br/>
     <textarea name="address" form="save-the-date-form" maxlength="500" class="large-text-input"></textarea><br/>
-    Number planning to attend (including yourself) <input name="guests" type="number" min="1" max="10" /><br/>
+    Number planning to attend (including yourself): <input name="guests" type="number" min="1" max="10" style="width:25px"/><br/>
     Hotel Preference (There is no commitment for checking any of these, Tat & Alex just want to make sure they're
     blocking off rooms where people actually would like to stay.)<br/>
     {% for accommodation in accommodations %}

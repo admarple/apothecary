@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <ul class=sections id={{ section_group_id }}>
+  <ul class=sections id={{ active_page }}>
     {% for section in sections %}
       <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}</li>
     {% else %}

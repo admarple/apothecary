@@ -76,6 +76,12 @@ def area():
     sections = area.sections
     return render_template('sections.html', **locals())
 
+
+@app.route('/party/')
+def party():
+    return render_template('sections.html', **locals())
+
+
 @app.route('/save-the-date/', methods=['GET', 'POST'])
 def save_the_date():
     if request.method == 'GET':

@@ -408,6 +408,7 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
         header_nav.navs.extend([
             Nav('index', '/', 'a M t'),
             Nav('story', '/story/', 'Our Story'),
+            Nav('party', '/party/', 'Wedding Party'),
             Nav('event', '/event/', 'Event Info'),
             Nav('travel', '/travel/', 'Travel Info'),
             Nav('area', '/area/', 'In the Area'),
@@ -420,11 +421,58 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
         footer_nav.put(dynamodb)
 
         story = SectionGroup('story')
-        story.sections.append(Section('her', 'Tatiana', 'Tatiana is the best :D'))
-        story.sections.append(Section('him', 'Alex', 'Tatiana is the best :D'))
-        story.sections.append(Section('couple', 'Our Story', 'Tat and Alex met in 2010 in Philadelphia. ' +
-                                      ' After a stint on opposite coasts following school, they converged ' +
-                                      ' on New York in 2014 and were engaged in 2016.'))
+        story.sections.append(Section('fling', 'The Beginning',
+            'Alex was a sophomore engineer on the diving team and Tat was a freshman engineer on the swim team. They started talking during \'10 Spring Fling. '
+            + '<br/><img src="/static/story/fling.jpg"/>'))
+        story.sections.append(Section('diving', 'Diving...',
+            'They managed to find time to date between school, diving...'
+            + '<br/><img src="/static/story/diving.jpg"/>'))
+        story.sections.append(Section('swimming', 'Swimming ...',
+            '... and swimming'
+            + '<br/><img src="/static/story/swimming.jpg"/>'))
+        story.sections.append(Section('alex_grad', 'Alex\'s Graduation',
+             'Two years flew by and all of a sudden Alex was graduating and moving to Seattle.'
+             + '<br/><img src="/static/story/alex_grad.jpg"/>'))
+        story.sections.append(Section('seattle', 'Alex in Seattle',
+            'Tat would visit him and they went to pick out pumpkins, toured the city, and even went skiing!'
+            + '<br/><img src="/static/story/skiing.jpg"/>'))
+        story.sections.append(Section('tat_grad', 'Tat\'s Graduation',
+            'It was then Tat\'s turn to graduate and she moved to the Big Apple.'
+            + '<br/><img src="/static/story/tat_grad.jpg"/>'))
+        story.sections.append(Section('chichen_itza', 'Chichen Itza',
+            'In February 2014 Alex & Tat went on their first trip together.Tat was super excited to escape frozen NYC to see Alex... Alex was excited about the columns at Chichen Itza.'
+            + '<br/><img src="/static/story/chichen_itza.jpg"/>'))
+        story.sections.append(Section('newark', 'Alex moves back East',
+            'A long four months later Alex moved to the city in June of 2014!!'
+            + '<br/><img src="/static/story/newark.jpg"/>'))
+        story.sections.append(Section('met', 'The Met',
+            '... where they would go to the Met ...'
+            + '<br/><img src="/static/story/met_rooftop.jpg"/>'))
+        story.sections.append(Section('central_park', 'Central Park',
+            '... and for walks in Central Park.'
+            + '<br/><img src="/static/story/central_park.jpg"/>'))
+        story.sections.append(Section('london', 'London',
+            'Their next trip was to London (This was Alex\'s first trip to Europe).'
+            + '<br/><img src="/static/story/tower_bridge.jpg"/>'))
+        story.sections.append(Section('paris', 'Paris',
+            'They then spent 2 days in Paris ...'
+            + '<br/><img src="/static/story/paris.jpg"/>'))
+        story.sections.append(Section('ireland', 'Ireland',
+            '... and a couple days in Ireland where Alex drove on the wrong side of the road and Tat navigated with a real map. They did not get lost... or crash.'
+            + '<br/><img src="/static/story/guinness.jpg"/>'))
+        story.sections.append(Section('vermont', 'Vermont',
+            'They survived the winter of 2014-2015 and decided to spend memorial day hiking and eating ice cream at the Ben & Jerry\'s factory in Waterbury, VT.'
+            + '<br/><img src="/static/story/green_mountains.jpg"/>'))
+        story.sections.append(Section('christmas', 'Christmas 2015',
+            'Alex had to work over Christmas so they spent the 2015 holidays in the city surrounded by beautiful christmas trees and lights. Tat even got her first New Years kiss!'
+            + '<br/><img src="/static/story/lincoln_square.jpg"/>'))
+        story.sections.append(Section('london_again', 'Londond ... again!',
+            'In April of 2016 they went back to London for Tat\'s second marathon...'
+            + '<br/><img src="/static/story/london_eye.jpg"/>'))
+        story.sections.append(Section('engaged', 'Engaged!',
+            '... and then flew to Iceland to see the beautiful contrasting country of fire & ice where Alex asked Tat to marry him (she said yes!)'
+            + '<br/><img src="/static/story/hallgrimskirkja.jpg"/>'))
+
         story.put(dynamodb)
 
         couple = Couple('0', 'Tatiana McLauchlan', 'Alex Marple')
@@ -436,7 +484,11 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
         event.put(dynamodb)
 
         travel = SectionGroup('travel')
-        travel.sections.append(Section('getting_there', 'Getting There', 'Jacksonville International Airport ... '))
+        travel.sections.append(Section('flying', 'Flying In', 'The nearest airport is Jacksonville International Airport.'))
+        travel.sections.append(Section('around_town', 'Getting Around Town', 'Getting around Jacksonville is most'
+            + ' manageable by car.  However, with ceremony, reception, and accommodations in walkable Neptune Beach,'
+            + ' it would be perfectly reasonable to take a shuttle to/from the airport and not set foot in another'
+            + ' vehicle for the remainder of the trip.  Tat & Alex will have info on shuttles up shortly!'))
         travel.put(dynamodb)
 
         accommodations = []
