@@ -9,23 +9,62 @@
 <div id=save-the-date>
   <h2>Save the Date!</h2>
   <form id="save-the-date-form" action="{{ url_for('save_the_date') }}" method="post">
-    Name: <input name="name" type="text" maxlength="100"/><br/>
-    Email: <input name="email" type="email" maxlength="100"/><br/>
-    Mailing Address: <br/>
-    <textarea name="address" form="save-the-date-form" maxlength="500" class="large-text-input"></textarea><br/>
-    Number planning to attend (including yourself): <input name="guests" type="number" min="1" max="10" style="width:25px"/><br/>
-    Hotel Preference (There is no commitment for checking any of these, Tat & Alex just want to make sure they're
-    blocking off rooms where people actually would like to stay.)<br/>
-    {% for accommodation in accommodations %}
-    <input name="hotel_preference" type="checkbox" value="{{ accommodation.name }}" />
-      <a target="_blank" href="{{ accommodation.link }}">{{ accommodation.name }}</a>:
-        {{ accommodation.price }} , {{ accommodation.miles_to_reception }} miles / {{ accommodation.driving_minutes_to_reception }} minutes from reception
-      <br/>
-    {% endfor %}
-    Any additional notes: <br/>
-    {# Looks like Flask has some issues with a textarea closed with /> #}
-    <textarea name="notes" form="save-the-date-form" maxlength="1000" class="large-text-input"></textarea><br/>
-    <input type="submit" value="Submit">
+    <table>
+      <tr>
+        <td>Name: </td>
+        <td><input name="name" type="text" maxlength="100"/></td>
+      </tr>
+      <tr>
+        <td>Email: </td>
+        <td><input name="email" type="email" maxlength="100"/></td>
+      </tr>
+      <tr>
+        <td>Mailing Address: </td>
+        <td><textarea name="address" form="save-the-date-form" maxlength="500" class="large-text-input"></textarea></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="tooltip">
+            <span class="tooltiptitle">Number planning to attend: </span>
+            <br/>
+            <span class="tooltiptext">
+              Including yourself
+            </span>
+          </div>
+        </td>
+        <td><input name="guests" type="number" min="1" max="10" style="width:30px"/></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="tooltip">
+            <span class="tooltiptitle">Hotel Preference:</span>
+            <br/>
+            <span class="tooltiptext">
+              There is no commitment for checking any of these, Tat & Alex just want to make sure they're
+              blocking off rooms where people actually would like to stay.
+            </span>
+          </div>
+        </td>
+        <td>
+          {% for accommodation in accommodations %}
+            <input name="hotel_preference" type="checkbox" value="{{ accommodation.name }}" style="width:30px"/>
+            <a target="_blank" href="{{ accommodation.link }}">{{ accommodation.name }}</a>:
+              {{ accommodation.price }} , {{ accommodation.miles_to_reception }} miles / {{ accommodation.driving_minutes_to_reception }} minutes from reception
+            <br/>
+          {% endfor %}
+        </td>
+      </tr>
+      <tr>
+        <td>Any additional notes: </td>
+        {# Looks like Flask has some issues with a textarea closed with /> #}
+        <td><textarea name="notes" form="save-the-date-form" maxlength="1000" class="large-text-input"></textarea></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Submit"></td>
+      </tr>
+    </table>
+    <br/>
   </form>
 </div>
 {% endblock %}

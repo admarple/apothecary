@@ -2,8 +2,6 @@
 {% set active_page = "index" %}
 {% block body %}
   <div id=index>
-    <h2 class="her">{{ g.her }}</h2>
-    <p>-- & --</p>
-    <h2 class="him">{{ g.him }}</h2>
+    <img src="{{ url_for('static', filename='logo.png') }}"/>
   </div>
 {% endblock %}

@@ -79,6 +79,9 @@ def area():
 
 @app.route('/party/')
 def party():
+    active_page = 'party'
+    party = SectionGroup.get(g.dynamodb, active_page)
+    sections = party.sections
     return render_template('sections.html', **locals())
 
 
