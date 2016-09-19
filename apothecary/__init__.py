@@ -43,6 +43,9 @@ def bind_common():
 def index():
     return render_template('index.html')
 
+@app.route('/ping')
+def ping():
+    return 'healthy'
 
 @app.route('/story/')
 def story():

@@ -2,7 +2,8 @@
 {% block body %}
   <ul class=sections id={{ active_page }}>
     {% for section in sections %}
-      <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}
+      <li><h2>{{ section.title }}</h2>
+      {{ section.text|markdown }}
     {% else %}
       <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em>
     {% endfor %}
