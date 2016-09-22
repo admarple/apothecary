@@ -13,4 +13,4 @@
 # This script preserves the virtualenv for uwsgi, but it can be run in the background
 
 source venv/bin/activate
-uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv
+uwsgi -s /tmp/apothecary.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv

@@ -27,7 +27,7 @@ if not app.debug:
 
 @app.before_request
 def bind_common():
-    g.dynamodb = boto3.resource('dynamodb')
+    g.dynamodb = boto3.resource('dynamodb', region_name=app.config['AWS_REGION'])
     header_nav = NavGroup.get(g.dynamodb, 'header_nav')
     footer_nav = NavGroup.get(g.dynamodb, 'footer_nav')
     couple = Couple.get(g.dynamodb, '0')
