@@ -10,16 +10,19 @@
 #   cd apothecary
 #   ./deploy/autoscale.sh
 
-# install nginx, git, and python3
-yum -y install libffi libffi-devel
+# install python3 and some build tools
+yum -y install libffi-devel
+yum -y install gcc
 yum -y install python34
 yum -y install python34-virtualenv
 
 # setup virtualenv and install required packages
-./.env
+adduser apothecary
+chown -R apothecary .
+sudo -u apothecary ./.env
 
 # start apothecary as a uwsgi application
-uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv
+sudo -u apothecary uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv
 
 # start nginx
 yum -y install nginx
