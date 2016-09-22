@@ -24,7 +24,7 @@ echo "setting up virtualenv and installing required packages"
 sudo -u apothecary ./.env
 
 echo "starting apothecary with uwsgi"
-sudo -u apothecary sh -c "source venv/bin/activate && uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv"
+sudo -u apothecary deploy/start_uwsgi.sh &
 
 echo "installing and starting nginx"
 yum -y install nginx
