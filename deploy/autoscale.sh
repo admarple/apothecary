@@ -16,13 +16,15 @@ yum -y install gcc
 yum -y install python34
 yum -y install python34-virtualenv
 
-# setup virtualenv and install required packages
 adduser apothecary
 chown -R apothecary .
-sudo -u apothecary ./.env
 
+su - apothecary
+# setup virtualenv and install required packages
+./.env
 # start apothecary as a uwsgi application
-sudo -u apothecary uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv
+uwsgi -s /tmp/uwsgi.sock --manage-script-name --mount /=apothecary:app --virtualenv ./venv
+exit
 
 # start nginx
 yum -y install nginx
