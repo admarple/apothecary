@@ -11,6 +11,7 @@
 #   ./deploy/autoscale.sh
 
 # install nginx, git, and python3
+yum -y install libffi libffi-devel
 yum -y install python34
 yum -y install python34-virtualenv
 
