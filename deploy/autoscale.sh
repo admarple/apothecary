@@ -18,7 +18,7 @@ yum -y install python34-virtualenv
 
 echo "adding user 'apothecary'"
 adduser apothecary
-chown -R apothecary .
+chown -R apothecary:apothecary .
 
 echo "setting up virtualenv and installing required packages"
 sudo -u apothecary ./.env
