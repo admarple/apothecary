@@ -19,5 +19,5 @@ uwsgi \
   --mount /=apothecary:app \
   --virtualenv ./venv \
   --chmod-socket=766 \
-  --plugin python3
-  --logto /tmp/apothecary_uwsgi.log
+  --plugin python3 \
+  --logto "$(pwd)/uwsgi.log"
