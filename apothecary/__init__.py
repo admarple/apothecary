@@ -39,6 +39,10 @@ def bind_common():
     g.title = g.her.split(' ')[0] + ' & ' + g.him.split(' ')[0]
 
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -91,6 +95,9 @@ def party():
 @app.route('/save-the-date/', methods=['GET', 'POST'])
 def save_the_date():
     if request.method == 'GET':
+        active_page = 'save-the-date'
+        save = SectionGroup.get(g.dynamodb, active_page)
+        sections = save.sections
         accommodations = sorted([accommodation for accommodation in Accommodation.scan(g.dynamodb)], key=lambda x: x.miles_to_reception)
         return render_template('save-the-date.html', **locals())
     elif request.method == 'POST':

@@ -1,18 +1,20 @@
+:root{
+    --theme-color: #a3ac99;
+    --theme-color-dark: #556246;
+    --theme-dark: #222;
+    --theme-light: #fafafa;
+}
+
 html,body {
     font-family: proxima-nova,"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
+    font-weight: 200;
     height: 100%;
     margin: 0;
 }
 .container {
-    background: #fafafa;
+    background: var(--theme-light);
     min-height: 100%;
     position: relative;
-}
-h1 {
-    font-size: 36px;
-}
-h2 {
-    font-size: 24px;
 }
 .page {
     width: 960px;
@@ -26,8 +28,8 @@ h2 {
     height: 50px;
     line-height: 50px;
     position: fixed;
-    color: #fafafa;
-    background: #a3ac99 none repeat scroll 0 0;
+    color: var(--theme-light);
+    background: var(--theme-color) none repeat scroll 0 0;
     box-shadow: 0 0 5px rgba(74, 74, 72, 1);
     top: 0;
     z-index: 99;
@@ -37,16 +39,16 @@ h2 {
 .footer {
     height: 50px;
     line-height: 50px;
-    background: #222 none repeat scroll 0 0;
-    color: #fafafa;
+    background: var(--theme-dark) none repeat scroll 0 0;
+    color: var(--theme-light);
     width: 100%;
     position: absolute;
     bottom: 0;
 }
 
 .nav .active {
-    color: #fafafa;
-    background: #556246;
+    color: var(--theme-light);
+    background: var(--theme-color-dark);
     display: inline-block;
 }
 .nav > li {
@@ -65,10 +67,10 @@ h2 {
     text-decoration: none;
 }
 .header a:hover {
-    color: #556246
+    color: var(--theme-color-dark)
 }
 .header .active a:hover {
-    color: #a3ac99
+    color: var(--theme-color)
 }
 .footer a:hover {
     color: #777777;
@@ -79,7 +81,7 @@ h2 {
     padding-left:0;
 }
 .body {
-    background: #fafafa;
+    background: var(--theme-light);
     padding-top: 50px;
     padding-bottom: 50px;
 }
@@ -111,6 +113,13 @@ h2 {
 #save-the-date-form input, .large-text-input {
     width: 200px;
 }
+#save-the-date-form input[type="submit"] {
+    background-color: var(--theme-color-dark);
+    border: none;
+    color: var(--theme-light);
+    font-size: 16px;
+    font-weight: 100;
+}
 
 .tooltip {
     position: relative;
@@ -119,14 +128,14 @@ h2 {
 }
 
 .tooltiptitle {
-    border-bottom: 1px dotted black;
+    border-bottom: 1px dotted var(--theme-dark);
 }
 
 .tooltip .tooltiptext {
     visibility: hidden;
     width: 100%;
-    background-color: black;
-    color: #fff;
+    background-color: var(--theme-dark);
+    color: var(--theme-light);
     text-align: center;
     padding: 5px 0;
     border-radius: 6px;
