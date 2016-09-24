@@ -8,6 +8,7 @@
 html,body {
     font-family: proxima-nova,"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
     font-weight: 200;
+    line-height: 1.5;
     height: 100%;
     margin: 0;
 }
@@ -119,6 +120,14 @@ html,body {
     color: var(--theme-light);
     font-size: 16px;
     font-weight: 100;
+}
+
+.form-label {
+    width: 25%;
+}
+.form-title {
+    font-size: 18px;
+    font-weight: 300;
 }
 
 .tooltip {
