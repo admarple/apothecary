@@ -139,8 +139,12 @@ h2 {
     visibility: visible;
 }
 
-#story img {
+#story {
     width: 500px;
+}
+
+#story img {
+    width: 100%;
     padding: 10px 0px;
 }
 
