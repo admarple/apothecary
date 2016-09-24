@@ -135,6 +135,13 @@ html,body {
     font-weight: 300;
 }
 
+/* Use font style that matches the rest of the page in form fields */
+textarea, input, button, select {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
 .tooltip {
     position: relative;
     display: inline-block;
