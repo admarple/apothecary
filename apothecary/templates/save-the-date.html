@@ -7,7 +7,7 @@
     {% endfor %}
 </ul>
 <div id=save-the-date>
-  <form id="save-the-date-form" action="{{ url_for('save_the_date') }}" method="post">
+  <form id="save-the-date-form" action="{{ url_for('save_the_date') }}" method="post" onsubmit="return validateForm('save-the-date-form', ['name'])">
     <table>
       <tr>
         <td class="form-label"><span class="form-title">Name: </span></td>
