@@ -11,6 +11,9 @@
         <a target="_blank" href="{{ accommodation.link }}">{{ accommodation.name }}</a>:
           {{ accommodation.price }} , {{ accommodation.miles_to_reception }} miles / {{ accommodation.driving_minutes_to_reception }} minutes from reception
         <br/>
+      {% else %}
+        We'll block off rooms to get a discount!
+        Let us know your preferences on the <a href="{{ url_for('save_the_date') }}">Save the Date</a> page.
       {% endfor %}
   </ul>
 {% endblock %}

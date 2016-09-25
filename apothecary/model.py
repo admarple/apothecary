@@ -126,11 +126,11 @@ class DAO(object):
         while True:
             last_key = from_dynamo.get('LastEvaluatedKey')
             for item in from_dynamo.get('Items'):
-                logging.info('loaded: {0}'.format(item))
+                logging.debug('loaded: {0}'.format(item))
                 dumped = json.dumps(item, use_decimal=True)
-                logging.info('dumped: {0}'.format(dumped))
+                logging.debug('dumped: {0}'.format(dumped))
                 unpickled = jsonpickle.decode(dumped)
-                logging.info('unpickled: {0}'.format(unpickled))
+                logging.debug('unpickled: {0}'.format(unpickled))
                 yield unpickled
             if not last_key:
                 break
@@ -142,11 +142,11 @@ class DAO(object):
         return dynamodb.Table(cls.schema['TableName'])
 
     def put(self, dynamodb):
-        logging.info('self: {0}'.format(self))
+        logging.debug('self: {0}'.format(self))
         pickled = jsonpickle.encode(self)
-        logging.info('pickled: {0}'.format(pickled))
+        logging.debug('pickled: {0}'.format(pickled))
         re_jsoned = json.loads(pickled, use_decimal=True)
-        logging.info('re-jsoned: {0}'.format(re_jsoned))
+        logging.debug('re-jsoned: {0}'.format(re_jsoned))
         from_dynamo = self.table(dynamodb).put_item(
             Item=re_jsoned,
             ReturnConsumedCapacity='INDEXES'
@@ -263,10 +263,11 @@ class Couple(DAO):
         }
     }
 
-    def __init__(self, couple_id, her, him):
+    def __init__(self, couple_id, her, him, accommodations=False):
         self.couple_id = couple_id
         self.her = her
         self.him = him
+        self.accommodations = accommodations
 
 
 class Guest(DAO):

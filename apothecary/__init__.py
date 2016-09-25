@@ -36,6 +36,7 @@ def bind_common():
     g.toes = footer_nav.navs
     g.her = couple.her
     g.him = couple.him
+    g.accommodations = couple.accommodations
     g.title = g.her.split(' ')[0] + ' & ' + g.him.split(' ')[0]
 
 
@@ -72,7 +73,8 @@ def travel():
     active_page = 'travel'
     travel = SectionGroup.get(g.dynamodb, active_page)
     sections = travel.sections
-    accommodations = sorted([accommodation for accommodation in Accommodation.scan(g.dynamodb)], key=lambda x: x.miles_to_reception)
+    if g.accommodations:
+        accommodations = sorted([accommodation for accommodation in Accommodation.scan(g.dynamodb)], key=lambda x: x.miles_to_reception)
     return render_template('travel.html', **locals())
 
 
