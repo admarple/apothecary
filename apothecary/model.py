@@ -103,7 +103,7 @@ class DAO(object):
 
     @classmethod
     def get_range_key(cls):
-        return next((schema for schema in cls.schema['KeySchema'] if schema['KeyType'] == 'HASH'), None)
+        return next((schema for schema in cls.schema['KeySchema'] if schema['KeyType'] == 'RANGE'), None)
 
     @classmethod
     def get(cls, dynamodb, hash_key, range_key=None):
@@ -174,6 +174,28 @@ class DAO(object):
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from DeleteItem: %s', from_dynamo['ConsumedCapacity'])
+
+    @staticmethod
+    def quotes_csv(values):
+        return ','.join(['"{0}"'.format(v) for v in values])
+
+    def field_names(self):
+        field_names = sorted([field for field in vars(self)])
+        hash_key = self.__class__.get_hash_key()['AttributeName']
+        range_key = self.__class__.get_range_key()
+        field_names.remove(hash_key)
+        field_names.insert(0, hash_key)
+        if range_key:
+            range_key = range_key['AttributeName']
+            field_names.remove(range_key)
+            field_names.insert(1, range_key)
+        return field_names
+
+    def dump_csv_header(self):
+        return DAO.quotes_csv(self.field_names())
+
+    def dump_csv(self):
+        return DAO.quotes_csv([getattr(self, field) for field in self.field_names()])
 
 
 class NavGroup(DAO):
