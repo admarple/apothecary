@@ -115,7 +115,7 @@ html,body {
     width: 200px;
 }
 #save-the-date-form .large-text-input {
-    width: 201px;
+    width: 204px;
 }
 #save-the-date-form input[type="submit"] {
     background-color: var(--theme-color-dark);
@@ -125,7 +125,7 @@ html,body {
     font-weight: 100;
     padding: 6px 16px;
     cursor: pointer;
-    width: 204px
+    width: 207px
 }
 #save-the-date-form input[type="submit"]:hover {
     box-shadow: 0 0 5px rgba(74, 74, 72, 1);
