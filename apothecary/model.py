@@ -338,7 +338,7 @@ class RSVP(DAO):
         }
     }
 
-    def __init__(self, name, email, address, guests, hotel_preference, notes):
+    def __init__(self, name, email, address, guests, hotel_preference, notes, declined=False):
         self.rsvp_id = re.sub(' +', ' ', name.lower().strip())
         self.name = non_null(name)
         self.email = non_null(email)
@@ -346,6 +346,7 @@ class RSVP(DAO):
         self.guests = non_null(guests)
         self.hotel_preference = non_null(hotel_preference)
         self.notes = non_null(notes)
+        self.declined = declined
 
 
 class Accommodation(DAO):

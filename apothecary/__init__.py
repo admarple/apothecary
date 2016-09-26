@@ -108,7 +108,9 @@ def save_the_date():
                     request.form['address'],
                     request.form['guests'],
                     request.form.getlist('hotel_preference'),
-                    request.form['notes'],
+                    request.form['notes']
         )
+        if 'decline' in request.form:
+            rsvp.declined = True
         rsvp.put(g.dynamodb)
         return render_template('save-the-date-submit.html', **locals())
