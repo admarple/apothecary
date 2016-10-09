@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <div id=index>
-  Oh no!  Something went terribly wrong!<br/>
+  {{ error_message }}<br/>
   <img src="{{ url_for('static', filename='fail.png') }}"/>
 </div>
 {% endblock %}

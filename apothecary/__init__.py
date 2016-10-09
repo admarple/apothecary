@@ -42,7 +42,13 @@ def bind_common():
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template('500.html'), 500
+    error_message = 'Oh no!  Something went terribly wrong!'
+    return render_template('fail.html', **locals()), 500
+
+@app.errorhandler(404)
+def not_found(e):
+    error_message = 'Oh no!  This page doesn\'t exist!'
+    return render_template('fail.html', **locals()), 404
 
 @app.route('/')
 def index():
