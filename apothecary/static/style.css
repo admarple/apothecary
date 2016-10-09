@@ -3,6 +3,8 @@
     --theme-color-dark: #556246;
     --theme-dark: #222;
     --theme-light: #fafafa;
+
+    --page-width: 960px;
 }
 
 html,body {
@@ -18,7 +20,7 @@ html,body {
     position: relative;
 }
 .page {
-    width: 960px;
+    width: var(--page-width);
     margin-left: auto;
     margin-right: auto;
     padding-left: 20px;
@@ -188,4 +190,37 @@ textarea, input, button, select {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+#party-header {
+    position: relative;
+}
+
+#wedding-party-pan {
+    width: var(--page-width);
+    position: relative;
+}
+
+.party-figure {
+    position: relative;
+    z-index: 100;
+    opacity: 0;
+    height: 70%;
+    bottom: 10%;
+}
+
+.party-figure.maid {
+    width: 7%;
+}
+
+.party-figure.bride {
+    width: 8%;
+}
+
+.party-figure.groom {
+    width: 8%;
+}
+
+.party-figure.man {
+    width: 8%;
 }

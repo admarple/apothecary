@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% set active_page = "party" %}
+{% block body %}
+<div id=party-header>
+  <img id="wedding-party-pan" src="{{ url_for('static', filename='wedding_party.png') }}">
+</div>
+<ul class=sections id={{ section_group_id }}>
+  {% for section in sections %}
+    <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}
+  {% endfor %}
+</ul>
+{% endblock %}

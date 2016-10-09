@@ -11,3 +11,12 @@ function validateForm(formName, required) {
         return false;
     }
 }
+
+$( document ).ready(function() {
+    $('.sections h3').each(function() {
+        if (! this.id || this.id === "") {
+            this.id = this.innerHTML;
+        }
+    });
+});
+
