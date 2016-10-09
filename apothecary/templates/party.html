@@ -3,6 +3,24 @@
 {% block body %}
 <div id=party-header>
   <img id="wedding-party-pan" src="{{ url_for('static', filename='wedding_party.png') }}">
+  <div id="party-links">
+    <a class="party-figure maid" title="Lauren Marple"><div></div></a>
+    <a class="party-figure maid" title="Katarina McLauchlan"><div></div></a>
+    <a class="party-figure maid" title="Shelby Fortin"><div></div></a>
+    <a class="party-figure maid" title="Liz Levitz"><div></div></a>
+    <a class="party-figure maid" title="Laurie White"><div></div></a>
+
+    <div class="party-figure bride" title="{{ g.her }}"></div>
+    <div class="party-figure groom" title="{{ g.him }}"></div>
+
+    <a class="party-figure man" title="Greg Benjamin"><div></div></a>
+    <a class="party-figure man" title="Sandesh Shettar"><div></div></a>
+    <a class="party-figure man" title="Ian Whitney"><div></div></a>
+    <a class="party-figure man" title="Wil Marple"><div></div></a>
+    <a class="party-figure man" title="Cameron McLauchlan"><div></div></a>
+    <a class="party-figure man" title="Alex Frias"><div></div></a>
+    <a class="party-figure man" title="Andrew McLauchlan"><div></div></a>
+  </div>
 </div>
 <ul class=sections id={{ section_group_id }}>
   {% for section in sections %}
