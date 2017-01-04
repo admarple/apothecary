@@ -1,7 +1,7 @@
 import boto3
 from flask import Flask, render_template, g, request, redirect, url_for
 from flask.ext.misaka import Misaka
-from .model import NavGroup, Nav, SectionGroup, Section, Couple, RSVP, Accommodation
+from .model import NavGroup, Nav, SectionGroup, Section, Couple, RSVP, Accommodation, Meal
 
 app = Flask(__name__)
 app.config.from_object('websiteconfig')
@@ -120,3 +120,28 @@ def save_the_date():
             rsvp.declined = True
         rsvp.put(g.dynamodb)
         return render_template('save-the-date-submit.html', **locals())
+
+
+@app.route('/rsvp/', methods=['GET', 'POST'])
+def rsvp():
+    if request.method == 'GET':
+        active_page = 'rsvp'
+        rsvp_sections = SectionGroup.get(g.dynamodb, active_page)
+        sections = rsvp_sections.sections
+        meals = sorted([meal for meal in Meal.scan(g.dynamodb)], key=lambda x: x.name)
+        return render_template('rsvp.html', **locals())
+    elif request.method == 'POST':
+        rsvp = RSVP(request.form['name'],
+                    None,
+                    None,
+                    request.form['guests'],
+                    None,
+                    None,
+                    False,
+                    request.form['meal_preference'],
+                    request.form['notes']
+                    )
+        if 'decline' in request.form:
+            rsvp.declined = True
+        rsvp.update_for_rsvp(g.dynamodb)
+        return render_template('rsvp-submit.html', **locals())

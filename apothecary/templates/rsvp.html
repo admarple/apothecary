@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% set active_page = "rsvp" %}
+{% block body %}
+<ul class=sections id={{ section_group_id }}>
+  {% for section in sections %}
+  <li><h2>{{ section.title }}</h2>{{ section.text|markdown }}
+    {% endfor %}
+</ul>
+<div id=rsvp>
+  <form id="rsvp-form" action="{{ url_for('rsvp') }}" method="post" onsubmit="return validateForm('rsvp-form', ['name', 'meal_preference'])">
+    <table>
+      <tr>
+        <td class="form-label"><span class="form-title">Name: </span></td>
+        <td class="form-field"><input name="name" type="text" maxlength="100"/></td>
+      </tr>
+      <tr>
+        <td class="form-label"><span class="form-title">I / We'd love to attend, but can't make the trip.</span></td>
+        <td class="form-field"><input type="submit" name="decline" value="Sorry ! " style="background: var(--theme-dark)"/></td>
+      </tr>
+      <tr>
+        <td class="form-label">
+          <span class="form-title">Number attending: </span>
+          <br/>
+          <span class="form-detail">Including yourself</span>
+        </td>
+        <td class="form-field"><input name="guests" type="number" min="1" max="10" style="width:30px"/></td>
+      </tr>
+      <tr>
+        <td class="form-label">
+          <span class="form-title">Meal Preference:</span>
+        </td>
+        <td class="form-field">
+          {% for meal in meals %}
+            <input name="meal_preference" type="radio" value="{{ meal.name }}" style="width:30px"/>
+            {{ meal.name }}
+            <br/>
+          {% endfor %}
+        </td>
+      </tr>
+      <tr>
+        <td class="form-label"><span class="form-title">Any additional notes: </span></td>
+        {# Looks like Flask has some issues with a textarea closed with "/>" #}
+        <td class="form-field"><textarea name="notes" form="rsvp-form" maxlength="1000" class="large-text-input"></textarea></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" name="submit" value="Submit" /></td>
+      </tr>
+    </table>
+    <br/>
+  </form>
+</div>
+{% endblock %}

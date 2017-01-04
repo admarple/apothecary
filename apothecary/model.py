@@ -98,18 +98,36 @@ class DAO(object):
         cls.schema['TableName'] = prefix + cls.schema['TableName']
 
     @classmethod
-    def get_hash_key(cls):
+    def get_hash_key_schema(cls):
         return next(schema for schema in cls.schema['KeySchema'] if schema['KeyType'] == 'HASH')
 
     @classmethod
-    def get_range_key(cls):
+    def get_hash_key_name(cls):
+        return cls.get_hash_key_schema()['AttributeName']
+
+    @classmethod
+    def get_range_key_schema(cls):
         return next((schema for schema in cls.schema['KeySchema'] if schema['KeyType'] == 'RANGE'), None)
 
     @classmethod
+    def get_range_key_name(cls):
+        return cls.get_range_key_schema()['AttributeName']
+
+    def get_keys(self):
+        hash_key_name = self.get_hash_key_name()
+        hash_key_val = getattr(self, hash_key_name)
+        keys = { hash_key_name : hash_key_val }
+        if self.get_range_key_schema():
+            range_key_name = self.get_range_key_name()
+            range_key_val = getattr(self, range_key_name)
+            keys[range_key_name] = range_key_val
+        return keys
+
+    @classmethod
     def get(cls, dynamodb, hash_key, range_key=None):
-        keys = { cls.get_hash_key()['AttributeName']: hash_key }
-        if range_key and cls.get_range_key():
-            keys[cls.get_range_key()['AttributeName']] = range_key
+        keys = { cls.get_hash_key_name(): hash_key }
+        if range_key and cls.get_range_key_schema():
+            keys[cls.get_range_key_name()] = range_key
 
         from_dynamo = cls.table(dynamodb).get_item(
             Key=keys,
@@ -153,22 +171,32 @@ class DAO(object):
         )
         logging.info('DynamoDB consumed capacity from PutItem: %s', from_dynamo['ConsumedCapacity'])
 
-    def update(self, dynamodb):
+    @staticmethod
+    def format_for_dynamo(item):
+        '''
+        TODO: implement this as a function that takes an item, and converts it into the DynamoDB representation.
+        For example, "hello" would become {"S": "hello"}, 2.6 would become {"N": "2.6"}, ["foo", "bar"] would
+        become {"SS": ["foo", "bar"]}, and so forth.
+
+        See http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_AttributeValue.html
+        '''
+        pass
+
+    def update(self, dynamodb, fields):
+        keys = self.get_keys()
+        update_expression = 'SET ' + ' , '.join(['{0} = :{0}'.format(field) for field in fields])
+        expression_values = { ':{0}'.format(field) : self.format_for_dynamo(getattr(self, field)) for field in fields }
+
         from_dynamo = self.table(dynamodb).update_item(
-            Item=json.loads(jsonpickle.encode(self), use_decimal=True),
+            Key=keys,
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_values,
             ReturnConsumedCapacity='INDEXES'
         )
         logging.info('DynamoDB consumed capacity from UpdateItem: %s', from_dynamo['ConsumedCapacity'])
 
     def delete(self, dynamodb):
-        hash_key = cls.get_hash_key()['AttributeName']
-        hash_key_value = getattr(self, hash_key)
-        keys = { hash_key: hash_key_value }
-        if cls.get_range_key():
-            range_key = cls.get_range_key()['AttributeName']
-            range_key_value = getattr(self, range_key)
-            keys[range_key] = range_key_value
-
+        keys = self.get_keys()
         from_dynamo = self.table(dynamodb).delete_item(
             Key=keys,
             ReturnConsumedCapacity='INDEXES'
@@ -181,12 +209,11 @@ class DAO(object):
 
     def field_names(self):
         field_names = sorted([field for field in vars(self)])
-        hash_key = self.__class__.get_hash_key()['AttributeName']
-        range_key = self.__class__.get_range_key()
+        hash_key = self.get_hash_key_name()
         field_names.remove(hash_key)
         field_names.insert(0, hash_key)
-        if range_key:
-            range_key = range_key['AttributeName']
+        if self.get_range_key_schema():
+            range_key = self.get_range_key_name()
             field_names.remove(range_key)
             field_names.insert(1, range_key)
         return field_names
@@ -338,7 +365,7 @@ class RSVP(DAO):
         }
     }
 
-    def __init__(self, name, email, address, guests, hotel_preference, notes, declined=False):
+    def __init__(self, name, email, address, guests, hotel_preference, notes, declined=False, meal_preference=None, rsvp_notes=None):
         self.rsvp_id = re.sub(' +', ' ', name.lower().strip())
         self.name = non_null(name)
         self.email = non_null(email)
@@ -347,6 +374,55 @@ class RSVP(DAO):
         self.hotel_preference = non_null(hotel_preference)
         self.notes = non_null(notes)
         self.declined = declined
+        self.meal_preference = meal_preference
+        self.rsvp_notes = rsvp_notes
+
+    def update_for_rsvp(self, dynamodb):
+        keys = self.get_keys()
+        update_expression = 'SET meal_preference = :meal_preference' \
+            + ' , guests = :guests' \
+            + ' , declined = :declined' \
+            + ' , rsvp_notes = :rsvp_notes '
+        expression_values = {
+            ':meal_preference': {'S': self.meal_preference},
+            ':guests': {'N': self.guests},
+            ':declined': {'N': self.declined},
+            ':rsvp_notes': {'S': self.rsvp_notes}
+        }
+
+        from_dynamo = self.table(dynamodb).update_item(
+            Key=keys,
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_values,
+            ReturnConsumedCapacity='INDEXES'
+        )
+        logging.info('DynamoDB consumed capacity from UpdateItem: %s', from_dynamo['ConsumedCapacity'])
+
+
+class Meal(DAO):
+    schema = {
+        'AttributeDefinitions': [
+            {
+                'AttributeName': 'name',
+                'AttributeType': 'S'
+            },
+        ],
+        'TableName': 'Meal',
+        'KeySchema': [
+            {
+                'AttributeName': 'name',
+                'KeyType': 'HASH'
+            },
+        ],
+        'ProvisionedThroughput': {
+            'ReadCapacityUnits': 1,
+            'WriteCapacityUnits': 1
+        }
+    }
+
+    def __init__(self, name, description=None):
+        self.name = name
+        self.description = description
 
 
 class Accommodation(DAO):
@@ -436,7 +512,7 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
             Nav('event', '/event/', 'Event Info'),
             Nav('travel', '/travel/', 'Travel Info'),
             Nav('area', '/area/', 'In the Area'),
-            Nav('save-the-date', '/save-the-date/', 'Save the Date')
+            Nav('rsvp', '/rsvp/', 'RSVP')
         ])
         header_nav.put(dynamodb)
 
@@ -634,6 +710,25 @@ def setup(fresh_data=False, fresh_tables=False, prefix=''):
             + '<a href="http://www.visitflorida.com/en-us.html">visitflorida.com</a>:'
             + ' additional info on destinations in the Sunshine State.'))
         area.put(dynamodb)
+
+        save_the_date = SectionGroup('save-the-date')
+        save_the_date.sections.append(Section('info', ' ',
+            'Please help us by filling in your name, mailing address, and the number of adults in your family '
+            + 'likely to attend. We appreciate your help in our planning! Formal Save the Date cards and '
+            + 'invitations to follow.'))
+        save_the_date.put(dynamodb)
+
+        rsvp_sections = SectionGroup('rsvp')
+        rsvp_sections.sections.append(Section('info', ' ', ' '))
+        rsvp_sections.put(dynamodb)
+
+        meals = []
+        meals.append(Meal('Chicken'))
+        meals.append(Meal('Beef'))
+        meals.append(Meal('Vegetable'))
+
+        for meal in meals:
+            meal.put(dynamodb)
 
 if __name__ == '__main__':
     options = docopt(__doc__)

@@ -119,13 +119,13 @@ a { cursor: pointer; }
     height: 75px;
 }
 
-#save-the-date-form input, .large-text-input {
+input, .large-text-input {
     width: 200px;
 }
-#save-the-date-form .large-text-input {
+.large-text-input {
     width: 204px;
 }
-#save-the-date-form input[type="submit"] {
+input[type="submit"] {
     background-color: var(--theme-color-dark);
     border: none;
     color: var(--theme-light);
@@ -135,7 +135,7 @@ a { cursor: pointer; }
     cursor: pointer;
     width: 207px
 }
-#save-the-date-form input[type="submit"]:hover {
+input[type="submit"]:hover {
     box-shadow: 0 0 5px rgba(74, 74, 72, 1);
 }
 
