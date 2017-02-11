@@ -6,7 +6,7 @@
     {% else %}
       <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em></li>
     {% endfor %}
-      <li><h2>Accommodations</h2></li>
+      {#<li><h2>Accommodations</h2></li>
       {% for accommodation in accommodations %}
         <a target="_blank" href="{{ accommodation.link }}">{{ accommodation.name }}</a>:
           {{ accommodation.price }} , {{ accommodation.miles_to_reception }} miles / {{ accommodation.driving_minutes_to_reception }} minutes from reception
@@ -14,7 +14,7 @@
       {% else %}
         We'll block off rooms to get a discount!
         Let us know your preferences on the <a href="{{ url_for('save_the_date') }}">Save the Date</a> page.
-      {% endfor %}
+      {% endfor %}#}
       <li><h2>In the Area</h2></li>
       {% for area_section in area_sections %}
         <li><h3>{{ area_section.title }}</h3>{{ area_section.text|markdown }}</li>
