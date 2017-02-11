@@ -83,6 +83,8 @@ def travel():
     sections = travel.sections
     if g.accommodations:
         accommodations = sorted([accommodation for accommodation in Accommodation.scan(g.dynamodb)], key=lambda x: x.miles_to_reception)
+    area = SectionGroup.get(g.dynamodb, 'area')
+    area_sections = area.sections
     return render_template('travel.html', **locals())
 
 
@@ -100,6 +102,14 @@ def party():
     party = SectionGroup.get(g.dynamodb, active_page)
     sections = party.sections
     return render_template('party.html', **locals())
+
+
+@app.route('/registry/')
+def registry():
+    active_page = 'registry'
+    registry = SectionGroup.get(g.dynamodb, active_page)
+    sections = registry.sections
+    return render_template('sections.html', **locals())
 
 
 @app.route('/save-the-date/', methods=['GET', 'POST'])

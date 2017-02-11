@@ -15,5 +15,12 @@
         We'll block off rooms to get a discount!
         Let us know your preferences on the <a href="{{ url_for('save_the_date') }}">Save the Date</a> page.
       {% endfor %}
+      <li><h2>In the Area</h2></li>
+      {% for area_section in area_sections %}
+        <li><h3>{{ area_section.title }}</h3>{{ area_section.text|markdown }}</li>
+      {% else %}
+        <li><em>Alas! The couple is procrastinating and hasn't yet added any details here.</em></li>
+      {% endfor %}
   </ul>
+
 {% endblock %}
