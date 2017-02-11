@@ -31,8 +31,8 @@
         </td>
         <td class="form-field">
           {% for meal in meals %}
-            <input name="meal_preference" type="radio" value="{{ meal.name }}" style="width:30px"/>
-            {{ meal.name }}
+            <input name="meal_preference_{{ meal.name }}" type="number" min="0" max="10" style="width:30px"/>
+            <span>{{ meal.name }}</span>
             <br/>
           {% endfor %}
         </td>

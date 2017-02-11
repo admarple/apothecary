@@ -7,6 +7,8 @@ app = Flask(__name__)
 app.config.from_object('websiteconfig')
 Misaka(app)
 
+meal_prefix = 'meal_preference_'
+
 if not app.debug:
     import logging
     from logging import Formatter
@@ -131,6 +133,8 @@ def rsvp():
         meals = sorted([meal for meal in Meal.scan(g.dynamodb)], key=lambda x: x.name)
         return render_template('rsvp.html', **locals())
     elif request.method == 'POST':
+        print(request.form)
+        meal_preference = { meal[len(meal_prefix):]: number for (meal, number) in request.form.items() if meal.startswith(meal_prefix) and number }
         rsvp = RSVP(request.form['name'],
                     None,
                     None,
@@ -138,7 +142,7 @@ def rsvp():
                     None,
                     None,
                     False,
-                    request.form['meal_preference'],
+                    meal_preference,
                     request.form['notes']
                     )
         if 'decline' in request.form:

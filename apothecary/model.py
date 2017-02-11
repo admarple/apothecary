@@ -365,7 +365,7 @@ class RSVP(DAO):
         }
     }
 
-    def __init__(self, name, email, address, guests, hotel_preference, notes, declined=False, meal_preference=None, rsvp_notes=None):
+    def __init__(self, name, email, address, guests, hotel_preference, notes, declined=False, meal_preference={}, rsvp_notes=None):
         self.rsvp_id = re.sub(' +', ' ', name.lower().strip())
         self.name = non_null(name)
         self.email = non_null(email)
@@ -384,10 +384,10 @@ class RSVP(DAO):
             + ' , declined = :declined' \
             + ' , rsvp_notes = :rsvp_notes '
         expression_values = {
-            ':meal_preference': {'S': self.meal_preference},
+            ':meal_preference': self.meal_preference,
             ':guests': {'N': self.guests},
             ':declined': {'N': self.declined},
-            ':rsvp_notes': {'S': self.rsvp_notes}
+            ':rsvp_notes': {'S': self.rsvp_notes or ' '}
         }
 
         from_dynamo = self.table(dynamodb).update_item(
