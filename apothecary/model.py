@@ -227,6 +227,9 @@ class DAO(object):
     def dump_csv(self):
         return DAO.quotes_csv([getattr(self, field) for field in self.field_names()])
 
+    def __str__(self):
+        return self.__dict__.__str__()
+
 
 class NavGroup(DAO):
     schema = {
