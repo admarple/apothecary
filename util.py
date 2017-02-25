@@ -18,11 +18,11 @@ from apothecary import model
 from docopt import docopt
 from boto3.dynamodb.conditions import Attr
 
-
 def dump_rsvp(options):
     dynamodb = boto3.resource('dynamodb')
     if options['--prefix']:
         model.RSVP.add_tablename_prefix(options['--prefix'])
+        options['--prefix'] = None
     if options['dump_rsvp']:
         rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
     else:
@@ -35,8 +35,11 @@ def dump_rsvp(options):
         print(rsvp.dump_csv())
 
 
-def raw_dump_rsvp():
+def raw_dump_rsvp(options):
     dynamodb = boto3.resource('dynamodb')
+    if options['--prefix']:
+        model.RSVP.add_tablename_prefix(options['--prefix'])
+        options['--prefix'] = None
     rsvp_table = model.RSVP.table(dynamodb)
     from_dynamo = rsvp_table.scan()
     args = {}
@@ -51,22 +54,21 @@ def raw_dump_rsvp():
             args['ExclusiveStartKey'] = last_key
             from_dynamo = rsvp_table.scan(args)
 
+
 def cleanup_rsvp(options):
     dynamodb = boto3.resource('dynamodb')
     if options['--prefix']:
         model.RSVP.add_tablename_prefix(options['--prefix'])
+        options['--prefix'] = None
     rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
     # rsvps = [model.RSVP.get(dynamodb, 'lover')]
     for rsvp in rsvps:
         try:
-            if isinstance(rsvp, model.RSVP) or rsvp['py/object']:
+            if isinstance(rsvp, model.RSVP):
                 logging.info('Skipping RSVP that already looks healthy: "{0}"'.format(rsvp))
                 continue
         except TypeError:
             logging.info('TypeError on RSVP "{0}".  Maybe it\'s already been cleaned up?'.format(rsvp))
-            continue
-        except KeyError:
-            logging.info('KeyError on RSVP "{0}".  Maybe it\'s already been cleaned up?'.format(rsvp))
             continue
 
         new_rsvp = model.RSVP(rsvp['rsvp_id'], 'email', 'address', 0, 'hotel', 'notes')
@@ -96,6 +98,50 @@ def cleanup_rsvp(options):
             new_rsvp.update_for_rsvp(dynamodb)
 
 
+def cleanup_old_rsvp(options):
+    dynamodb = boto3.resource('dynamodb')
+    if options['--prefix']:
+        model.RSVP.add_tablename_prefix(options['--prefix'])
+        options['--prefix'] = None
+    rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
+    for rsvp in rsvps:
+        try:
+            if not isinstance(rsvp, model.RSVP):
+                logging.info('Skipping RSVP that isn\'t old: "{0}"'.format(rsvp))
+                continue
+        except TypeError:
+            logging.info('TypeError on RSVP "{0}".  Maybe it\'s already been cleaned up?'.format(rsvp))
+            continue
+        except KeyError:
+            logging.info('KeyError on RSVP "{0}".  Maybe it\'s already been cleaned up?'.format(rsvp))
+            continue
+
+        safe_to_update = True
+        try:
+            rsvp.meal_preference = rsvp.meal_preference
+        except:
+            logging.warning('Error on RSVP "{0}" "meal_preference": {1}'.format(rsvp.rsvp_id, sys.exc_info()[0]))
+            safe_to_update = False
+        try:
+            rsvp.declined = rsvp.declined['N']
+        except:
+            logging.warning('Error on RSVP "{0}" "declined": {1}'.format(rsvp.rsvp_id, sys.exc_info()[0]))
+            safe_to_update = False
+        try:
+            rsvp.guests = rsvp.guests['N']
+        except:
+            logging.warning('Error on RSVP "{0}" "guests": {1}'.format(rsvp.rsvp_id, sys.exc_info()[0]))
+            safe_to_update = False
+        try:
+            rsvp.rsvp_notes = rsvp.rsvp_notes['S']
+        except:
+            logging.warning('Error on RSVP "{0}" "rsvp_notes": {1}'.format(rsvp.rsvp_id, sys.exc_info()[0]))
+            safe_to_update = False
+        if safe_to_update:
+            logging.info('Updating RSVP {0}'.format(rsvp))
+            rsvp.update_for_rsvp(dynamodb)
+
+
 def get_log_file(options):
     log_file = options['--log-file']
     if not log_file:
@@ -111,5 +157,6 @@ if __name__ == '__main__':
         dump_rsvp(options)
     if options['cleanup_rsvp']:
         cleanup_rsvp(options)
+        cleanup_old_rsvp(options)
     if options['raw_dump_rsvp']:
-        raw_dump_rsvp()
+        raw_dump_rsvp(options)
