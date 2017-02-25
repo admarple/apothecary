@@ -138,10 +138,10 @@ class DAO(object):
         return jsonpickle.decode(json.dumps(from_dynamo['Item'], use_decimal=True))
 
     @classmethod
-    def scan(cls, dynamodb):
+    def scan(cls, dynamodb, **kwargs):
         table = cls.table(dynamodb)
-        from_dynamo = table.scan()
         while True:
+            from_dynamo = table.scan(kwargs)
             last_key = from_dynamo.get('LastEvaluatedKey')
             for item in from_dynamo.get('Items'):
                 logging.debug('loaded: {0}'.format(item))
@@ -153,7 +153,7 @@ class DAO(object):
             if not last_key:
                 break
             else:
-                from_dynamo = table.scan(ExclusiveStartKey=last_key)
+                kwargs['ExclusiveStartKey'] = last_key
 
     @classmethod
     def table(cls, dynamodb):
@@ -218,6 +218,9 @@ class DAO(object):
             field_names.insert(1, range_key)
         return field_names
 
+    def module_name(self):
+        return '.'.join([self.__module__, self.__class__.__name__])
+
     def dump_csv_header(self):
         return DAO.quotes_csv(self.field_names())
 
@@ -242,7 +245,7 @@ class NavGroup(DAO):
         ],
         'ProvisionedThroughput': {
             'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'WriteCapacityUnits': 1
         }
     }
 
@@ -275,7 +278,7 @@ class SectionGroup(DAO):
         ],
         'ProvisionedThroughput': {
             'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'WriteCapacityUnits': 1
         }
     }
 
@@ -308,7 +311,7 @@ class Couple(DAO):
         ],
         'ProvisionedThroughput': {
             'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'WriteCapacityUnits': 1
         }
     }
 
@@ -382,17 +385,23 @@ class RSVP(DAO):
         update_expression = 'SET meal_preference = :meal_preference' \
             + ' , guests = :guests' \
             + ' , declined = :declined' \
-            + ' , rsvp_notes = :rsvp_notes '
+            + ' , rsvp_notes = :rsvp_notes' \
+            + ' , #py = :py_object'
+        expression_names = {
+            '#py': 'py/object'
+        }
         expression_values = {
             ':meal_preference': self.meal_preference,
-            ':guests': {'N': self.guests},
-            ':declined': {'N': self.declined},
-            ':rsvp_notes': {'S': self.rsvp_notes or ' '}
+            ':guests': self.guests,
+            ':declined': self.declined,
+            ':rsvp_notes': self.rsvp_notes or ' ',
+            ':py_object': self.module_name()
         }
 
         from_dynamo = self.table(dynamodb).update_item(
             Key=keys,
             UpdateExpression=update_expression,
+            ExpressionAttributeNames=expression_names,
             ExpressionAttributeValues=expression_values,
             ReturnConsumedCapacity='INDEXES'
         )
@@ -442,7 +451,7 @@ class Accommodation(DAO):
         ],
         'ProvisionedThroughput': {
             'ReadCapacityUnits': 2,
-            'WriteCapacityUnits': 2
+            'WriteCapacityUnits': 1
         }
     }
 

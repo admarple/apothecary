@@ -2,6 +2,10 @@
 {% set active_page = "rsvp" %}
 {% block body %}
   <div id=rsvp-submit>
-    Thanks!  Looking forward to seeing you!
+    {% if rsvp.declined %}
+      Sorry we won't see you for the wedding, but thank you for the reply!
+    {% else %}
+      Thanks!  Looking forward to seeing you!
+    {% endif %}
   </div>
 {% endblock %}
