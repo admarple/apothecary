@@ -25,7 +25,9 @@ def dump_rsvp(options):
         model.RSVP.add_tablename_prefix(options['--prefix'])
         options['--prefix'] = None
     if options['dump_rsvp']:
-        rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
+        logging.info('ONLY DUMPING RSVPS')
+        rsvps = model.RSVP.scan(dynamodb,
+                                FilterExpression=Attr('meal_preference').exists() | Attr('declined').eq(True))
     else:
         rsvps = model.RSVP.scan(dynamodb)
     header_rsvp = model.RSVP('name',

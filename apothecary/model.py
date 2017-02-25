@@ -141,7 +141,7 @@ class DAO(object):
     def scan(cls, dynamodb, **kwargs):
         table = cls.table(dynamodb)
         while True:
-            from_dynamo = table.scan(kwargs)
+            from_dynamo = table.scan(**kwargs)
             last_key = from_dynamo.get('LastEvaluatedKey')
             for item in from_dynamo.get('Items'):
                 logging.debug('loaded: {0}'.format(item))
