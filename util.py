@@ -18,6 +18,7 @@ from apothecary import model
 from docopt import docopt
 from boto3.dynamodb.conditions import Attr
 
+
 def dump_rsvp(options):
     dynamodb = boto3.resource('dynamodb')
     if options['--prefix']:
@@ -27,12 +28,18 @@ def dump_rsvp(options):
         rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
     else:
         rsvps = model.RSVP.scan(dynamodb)
-    header = True
+    header_rsvp = model.RSVP('name',
+                             'email',
+                             'address',
+                             'guests',
+                             'hotel_preference',
+                             'notes',
+                             declined=False,
+                             meal_preference={"meal": "pref"},
+                             rsvp_notes='rsvp_notes')
+    print(header_rsvp.dump_csv_header())
     for rsvp in rsvps:
-        if header:
-            print(rsvp.dump_csv_header())
-            header = False
-        print(rsvp.dump_csv())
+        print(rsvp.dump_csv(ref_obj=header_rsvp))
 
 
 def raw_dump_rsvp(options):

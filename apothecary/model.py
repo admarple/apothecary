@@ -221,11 +221,15 @@ class DAO(object):
     def module_name(self):
         return '.'.join([self.__module__, self.__class__.__name__])
 
-    def dump_csv_header(self):
-        return DAO.quotes_csv(self.field_names())
+    def dump_csv_header(self, ref_obj=None):
+        if not ref_obj:
+            ref_obj = self
+        return DAO.quotes_csv(ref_obj.field_names())
 
-    def dump_csv(self):
-        return DAO.quotes_csv([getattr(self, field) for field in self.field_names()])
+    def dump_csv(self, ref_obj=None):
+        if not ref_obj:
+            ref_obj = self
+        return DAO.quotes_csv([getattr(self, field, non_null(None)) for field in ref_obj.field_names()])
 
     def __str__(self):
         return self.__dict__.__str__()
@@ -381,7 +385,7 @@ class RSVP(DAO):
         self.notes = non_null(notes)
         self.declined = declined
         self.meal_preference = meal_preference
-        self.rsvp_notes = rsvp_notes
+        self.rsvp_notes = non_null(rsvp_notes)
 
     def update_for_rsvp(self, dynamodb):
         keys = self.get_keys()
