@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Usage:
-  util.py [options] ( dump_rsvp | dump_save_the_date | cleanup_rsvp | raw_dump_rsvp )
+  util.py [options] ( dump_rsvp | dump_save_the_date | cleanup_rsvp | raw_dump_rsvp | dump_meal_rsvps )
 
 Options:
   --prefix <prefix>       Prefix for dynamodb table names
@@ -16,8 +16,7 @@ import logging
 import simplejson as json
 from apothecary import model
 from docopt import docopt
-from boto3.dynamodb.conditions import Attr
-
+from functools import reduce
 
 def dump_rsvp(options):
     dynamodb = boto3.resource('dynamodb')
@@ -26,8 +25,7 @@ def dump_rsvp(options):
         options['--prefix'] = None
     if options['dump_rsvp']:
         logging.info('ONLY DUMPING RSVPS')
-        rsvps = model.RSVP.scan(dynamodb,
-                                FilterExpression=Attr('meal_preference').exists() | Attr('declined').eq(True))
+        rsvps = model.RSVP.scan_for_rsvp(dynamodb)
     else:
         rsvps = model.RSVP.scan(dynamodb)
     header_rsvp = model.RSVP('name',
@@ -42,6 +40,27 @@ def dump_rsvp(options):
     print(header_rsvp.dump_csv_header())
     for rsvp in rsvps:
         print(rsvp.dump_csv(ref_obj=header_rsvp))
+
+
+def dump_meal_rsvps(options):
+    dynamodb = boto3.resource('dynamodb')
+    if options['--prefix']:
+        model.RSVP.add_tablename_prefix(options['--prefix'])
+        options['--prefix'] = None
+    rsvps = model.RSVP.scan_for_rsvp(dynamodb)
+    meals = model.Meal.scan(dynamodb)
+    meal_names = [meal.name for meal in meals]
+
+    def reduce_meal_pref(meal_names, acc, meal_pref):
+        for meal_name in meal_names:
+            acc[meal_name] = int(acc.get(meal_name, 0))
+            acc[meal_name] += int(meal_pref.get(meal_name, 0))
+        return acc
+
+    meal_counts = reduce(lambda acc, rsvp : reduce_meal_pref(meal_names, acc, rsvp), [rsvp.meal_preference for rsvp in rsvps if rsvp.meal_preference])
+
+    print(model.DAO.quotes_csv(meal_counts.keys()))
+    print(model.DAO.quotes_csv(meal_counts.values()))
 
 
 def raw_dump_rsvp(options):
@@ -70,7 +89,6 @@ def cleanup_rsvp(options):
         model.RSVP.add_tablename_prefix(options['--prefix'])
         options['--prefix'] = None
     rsvps = model.RSVP.scan(dynamodb, FilterExpression=Attr('meal_preference').exists())
-    # rsvps = [model.RSVP.get(dynamodb, 'lover')]
     for rsvp in rsvps:
         try:
             if isinstance(rsvp, model.RSVP):
@@ -164,6 +182,8 @@ if __name__ == '__main__':
     logging.basicConfig(filename=get_log_file(options), level=logging.getLevelName(options['--log-level'].upper()))
     if options['dump_rsvp'] or options['dump_save_the_date']:
         dump_rsvp(options)
+    if options['dump_meal_rsvps']:
+        dump_meal_rsvps(options)
     if options['cleanup_rsvp']:
         cleanup_rsvp(options)
         cleanup_old_rsvp(options)

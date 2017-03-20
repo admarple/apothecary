@@ -18,6 +18,7 @@ import logging
 import re
 import boto3
 import botocore.exceptions
+from boto3.dynamodb.conditions import Attr
 from docopt import docopt
 from decimal import Decimal
 
@@ -386,6 +387,14 @@ class RSVP(DAO):
         self.declined = declined
         self.meal_preference = meal_preference
         self.rsvp_notes = non_null(rsvp_notes)
+
+    @classmethod
+    def scan_for_rsvp(cls, dynamodb, **kwargs):
+        if 'FilterExpression' in kwargs:
+            kwargs['FilterExpression'] = kwargs['FilterExpression'] & (Attr('meal_preference').exists() | Attr('declined').eq(True))
+        else:
+            kwargs['FilterExpression'] = Attr('meal_preference').exists() | Attr('declined').eq(True)
+        return cls.scan(dynamodb, **kwargs)
 
     def update_for_rsvp(self, dynamodb):
         keys = self.get_keys()
